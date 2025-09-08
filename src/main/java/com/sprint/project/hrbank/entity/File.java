@@ -8,10 +8,21 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
+import lombok.Builder;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+
 @Entity
 @Table(name = "files")
 @AllArgsConstructor
 @NoArgsConstructor
+
+@RequiredArgsConstructor
+@Getter
+@Setter
+@Builder
+
 public class File {
 
   @Id

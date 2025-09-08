@@ -63,3 +63,4 @@
 - 최소 1명 이상의 Approve 필요
 - Conflict 발생 시 팀 채널에 공유 후 해결
 - Draft 상태에서는 Merge 불가
+ 

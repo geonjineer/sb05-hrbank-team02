@@ -43,7 +43,7 @@ public class FileController {
 
     //fileName 한글 and 특수문자 안전 처리
     String fileName = StringUtils.hasText(meta.fileName()) ? meta.fileName() : String.valueOf(id);
-    String encoded = URLEncoder.encode(fileName, StandardCharsets.UTF_8).replace("\\+", "%20");
+    String encoded = URLEncoder.encode(fileName, StandardCharsets.UTF_8).replace("+", "%20");
     String contentDisposition =
         "attachment; filename=\"" + fileName.replace("\"", "") + "\"; filename*=UTF-8''" + encoded;
 

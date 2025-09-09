@@ -34,6 +34,7 @@ public class Employee {
   private String email;
 
   @Column(updatable = false, nullable = false)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private String employeeNumber;
 
   @Column(nullable = false)
@@ -53,6 +54,18 @@ public class Employee {
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "profile_image_id")
   private File profileImage;
+
+  public Employee(String name, String email, LocalDate hireDate,
+      String position, Department department, File profileImage) {
+    this.name = name;
+    this.email = email;
+    this.hireDate = hireDate;
+    this.position = position;
+    this.department = department;
+    this.profileImage = profileImage;
+
+    this.status = EmployeeStatus.ACTIVE;
+  }
 
   public boolean update(String name, String email, LocalDate hireDate, String position, Department department, File profileImage) {
     boolean changed = false;

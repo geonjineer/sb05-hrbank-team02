@@ -7,13 +7,18 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "departments")
+@Getter @Setter @SuperBuilder
 @AllArgsConstructor
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Department {
 
   @Id
@@ -21,7 +26,12 @@ public class Department {
   @Column(updatable = false, nullable = false)
   private long id;
 
+  @Column(unique = true, nullable = false)
   private String name;
+
+  @Column(nullable = false)
   private String description;
+
+  @Column(nullable = false)
   private LocalDate establishedDate;
 }

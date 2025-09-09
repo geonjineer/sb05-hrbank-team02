@@ -1,6 +1,5 @@
 package com.sprint.project.hrbank.controller;
 
-import com.sprint.project.hrbank.dto.employee.CursorPageResponse;
 import com.sprint.project.hrbank.dto.employee.EmployeeCreateRequest;
 import com.sprint.project.hrbank.dto.employee.EmployeeDto;
 import com.sprint.project.hrbank.dto.employee.EmployeeSearchRequest;

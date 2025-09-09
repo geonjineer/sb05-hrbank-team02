@@ -36,4 +36,11 @@ public class EmployeeService {
     return employeeMapper.toDto(employee);
   }
 
+  @Transactional(readOnly = true)
+  public EmployeeDto findById(Long id) {
+    return employeeMapper.toDto(employeeRepository.findById(id).orElseThrow(
+        () -> new NoSuchElementException("Employee not found with id: " + id)
+    ));
+  }
+
 }

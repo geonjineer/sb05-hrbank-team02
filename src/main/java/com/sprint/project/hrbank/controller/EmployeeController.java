@@ -1,7 +1,9 @@
 package com.sprint.project.hrbank.controller;
 
+import com.sprint.project.hrbank.dto.employee.CursorPageResponse;
 import com.sprint.project.hrbank.dto.employee.EmployeeCreateRequest;
 import com.sprint.project.hrbank.dto.employee.EmployeeDto;
+import com.sprint.project.hrbank.dto.employee.EmployeeSearchRequest;
 import com.sprint.project.hrbank.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -32,5 +34,10 @@ public class EmployeeController {
   @GetMapping("/{id}")
   public ResponseEntity<EmployeeDto> findById(@PathVariable long id) {
     return ResponseEntity.ok().body(employeeService.findById(id));
+  }
+
+  @GetMapping
+  public CursorPageResponse<EmployeeDto> findAll(EmployeeSearchRequest request) {
+    return employeeService.find(request);
   }
 }

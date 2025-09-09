@@ -14,8 +14,7 @@ public record EmployeeDto(
     String departmentName,
     String position,
     LocalDate hireDate,
-    EmployeeStatus status,
-    String memo
+    EmployeeStatus status
 ) {
 
 }

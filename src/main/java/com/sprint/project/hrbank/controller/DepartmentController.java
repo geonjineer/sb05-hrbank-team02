@@ -6,10 +6,13 @@ import com.sprint.project.hrbank.service.DepartmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,11 +22,22 @@ public class DepartmentController {
   private final DepartmentService departmentService;
 
   @PostMapping
-  public ResponseEntity<DepartmentDto> createDepartment(@RequestBody DepartmentCreateRequest req) {
+  public ResponseEntity<DepartmentDto> create(@RequestBody DepartmentCreateRequest req) {
     DepartmentDto created = departmentService.create(req);
     return ResponseEntity
         .status(HttpStatus.CREATED)
         .body(created);
+  }
+
+  @GetMapping("/{id}")
+  public ResponseEntity<DepartmentDto> findById(@PathVariable Long id) {
+    DepartmentDto department = departmentService.find(id);
+    if (department == null) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Department not found");
+    }
+    return ResponseEntity
+        .status(HttpStatus.OK)
+        .body(department);
   }
 
 }

@@ -30,4 +30,11 @@ public class DepartmentService {
 
     return departmentMapper.toDepartmentDto(department);
   }
+
+
+  @Transactional
+  public DepartmentDto find(Long id) {
+    return departmentRepository.findById(id)
+        .map(departmentMapper::toDepartmentDto).orElse(null);
+  }
 }

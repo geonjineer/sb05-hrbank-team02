@@ -6,6 +6,7 @@ import jakarta.annotation.Nullable;
 import java.util.List;
 
 public interface EmployeeQueryRepository {
+
   List<Employee> search(
       EmployeeSearchRequest request,
       int sizePlusOne,

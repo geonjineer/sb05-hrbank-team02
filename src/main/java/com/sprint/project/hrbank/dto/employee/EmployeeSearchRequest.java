@@ -10,14 +10,14 @@ public record EmployeeSearchRequest(
     String employeeNumber,
     String departmentName,
     String position,
-    @DateTimeFormat(iso = ISO.DATE)LocalDate hireDateFrom,
-    @DateTimeFormat(iso = ISO.DATE)LocalDate hireDateTo,
+    @DateTimeFormat(iso = ISO.DATE) LocalDate hireDateFrom,
+    @DateTimeFormat(iso = ISO.DATE) LocalDate hireDateTo,
     EmployeeStatus status,
     Long idAfter,
     String cursor,
     Integer size,
     String sortField,    // name | employeeNumber | hireDate
     String sortDirection // asc | desc
-    ) {
+) {
 
 }

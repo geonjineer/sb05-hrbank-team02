@@ -23,9 +23,8 @@ public class EmployeeQueryRepositoryImpl implements EmployeeQueryRepository {
 
   private final JPAQueryFactory queryFactory;
 
-  private static final QEmployee e =  QEmployee.employee;
-  private static final QDepartment d =  QDepartment.department;
-
+  private static final QEmployee e = QEmployee.employee;
+  private static final QDepartment d = QDepartment.department;
 
   @Override
   public List<Employee> search(EmployeeSearchRequest request,
@@ -41,7 +40,7 @@ public class EmployeeQueryRepositoryImpl implements EmployeeQueryRepository {
     if (hasText(request.nameOrEmail())) {
       where.and(
           e.name.containsIgnoreCase(request.nameOrEmail())
-          .or(e.email.containsIgnoreCase(request.nameOrEmail()))
+              .or(e.email.containsIgnoreCase(request.nameOrEmail()))
       );
     }
     if (hasText(request.employeeNumber())) {
@@ -61,7 +60,7 @@ public class EmployeeQueryRepositoryImpl implements EmployeeQueryRepository {
     if (request.hireDateTo() != null) {
       where.and(e.hireDate.loe(request.hireDateTo()));
     }
-    if(request.status() != null) {
+    if (request.status() != null) {
       where.and(e.status.eq(request.status()));
     }
 
@@ -86,7 +85,7 @@ public class EmployeeQueryRepositoryImpl implements EmployeeQueryRepository {
   private OrderSpecifier<?> buildPrimaryOrder(String sortField, boolean asc) {
     return switch (sortField) {
       case "employeeNumber" -> asc ? e.employeeNumber.asc() : e.employeeNumber.desc();
-      case "hireDate"  -> asc ? e.hireDate.asc() : e.hireDate.desc();
+      case "hireDate" -> asc ? e.hireDate.asc() : e.hireDate.desc();
       default -> asc ? e.name.asc() : e.name.desc();
     };
   }

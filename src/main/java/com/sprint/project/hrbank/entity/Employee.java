@@ -72,7 +72,8 @@ public class Employee {
     this.status = EmployeeStatus.ACTIVE;
   }
 
-  public boolean update(String name, String email, LocalDate hireDate, String position, Department department, File profileImage) {
+  public boolean update(String name, String email, LocalDate hireDate, String position,
+      Department department, File profileImage) {
     boolean changed = false;
 
     if (this.name != null && !name.equals(this.name)) {

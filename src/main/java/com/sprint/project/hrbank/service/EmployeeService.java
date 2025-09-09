@@ -1,15 +1,16 @@
 package com.sprint.project.hrbank.service;
+
 import com.sprint.project.hrbank.controller.CursorPageResponse;
 import com.sprint.project.hrbank.dto.employee.EmployeeCreateRequest;
 import com.sprint.project.hrbank.dto.employee.EmployeeDto;
 import com.sprint.project.hrbank.dto.employee.EmployeeSearchRequest;
+import com.sprint.project.hrbank.dto.employee.EmployeeUpdateRequest;
 import com.sprint.project.hrbank.entity.Department;
 import com.sprint.project.hrbank.entity.Employee;
+import com.sprint.project.hrbank.entity.File;
 import com.sprint.project.hrbank.mapper.CursorCodec;
 import com.sprint.project.hrbank.mapper.CursorCodec.CursorPayload;
 import com.sprint.project.hrbank.mapper.CursorPageAssembler;
-import com.sprint.project.hrbank.dto.employee.EmployeeUpdateRequest;
-import com.sprint.project.hrbank.entity.File;
 import com.sprint.project.hrbank.mapper.EmployeeMapper;
 import com.sprint.project.hrbank.repository.DepartmentRepository;
 import com.sprint.project.hrbank.repository.EmployeeRepository;
@@ -136,10 +137,13 @@ public class EmployeeService {
 
     // 2. DTO에 담겨온 ID로 연관 엔티티(부서, 프로필 이미지) 조회
     Department department = departmentRepository.findById(request.departmentId())
-        .orElseThrow(() -> new NoSuchElementException("Department not found with id: " + request.departmentId()));
+        .orElseThrow(() -> new NoSuchElementException(
+            "Department not found with id: " + request.departmentId()));
 
-    File profileImage = (request.profileImageId() != null) ? fileRepository.findById(request.profileImageId())
-        .orElseThrow(() -> new NoSuchElementException("File not found with id: " + request.profileImageId())) : null;
+    File profileImage =
+        (request.profileImageId() != null) ? fileRepository.findById(request.profileImageId())
+            .orElseThrow(() -> new NoSuchElementException(
+                "File not found with id: " + request.profileImageId())) : null;
 
     // 3. 엔티티 값을 DTO 값으로 변경 (더티 체킹 활용)
     employee.update(

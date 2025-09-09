@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import lombok.Builder;
 
 @Builder
-
 public record EmployeeCreateRequest(
     String name,
     String email,

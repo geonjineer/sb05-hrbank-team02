@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface FileRepository extends JpaRepository<File, Long> {
 
-  List<File> id(Long id);
+  // findById, findAll, save, deleteById, existsById 등 기본 제공됨.
 }

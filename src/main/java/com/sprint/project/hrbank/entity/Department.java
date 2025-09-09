@@ -18,7 +18,6 @@ import lombok.Setter;
 @Table(name = "departments")
 @Getter @Setter @Builder
 @AllArgsConstructor
-@NoArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Department {
 

@@ -6,7 +6,8 @@ public record DepartmentDto(
     long id,
     String name,
     String description,
-    LocalDate establishedDate
+    LocalDate establishedDate,
+    long employeeCount
 ) {
 
 }

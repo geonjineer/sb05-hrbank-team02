@@ -50,10 +50,10 @@ public class EmployeeService {
 
     // 2. DTO에 담겨온 ID로 연관 엔티티(부서, 프로필 이미지) 조회
     Department department = departmentRepository.findById(request.departmentId())
-        .orElseThrow(() -> new NoSuchElementException("Department not found with id: ".concat(request.departmentId().toString())));
+        .orElseThrow(() -> new NoSuchElementException("Department not found with id: " + request.departmentId()));
 
     File profileImage = (request.profileImageId() != null) ? fileRepository.findById(request.profileImageId())
-        .orElseThrow(() -> new NoSuchElementException("File not found with id: ".concat(request.profileImageId().toString()))) : null;
+        .orElseThrow(() -> new NoSuchElementException("File not found with id: " + request.profileImageId())) : null;
 
     // 3. 엔티티 값을 DTO 값으로 변경 (더티 체킹 활용)
     employee.update(

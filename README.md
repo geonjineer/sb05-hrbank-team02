@@ -31,36 +31,156 @@
 
 ---
 
-## 📑 API Endpoints (요약)
+네, 제공해주신 API 명세의 엔드포인트와 스키마를 명확하게 정리해 드리겠습니다.
 
-### 직원(Employee)
-- `GET /api/employees` — 직원 목록 조회
-- `POST /api/employees` — 신규 직원 등록
-- `GET /api/employees/{id}` — 직원 상세 조회
-- `PATCH /api/employees/{id}` — 직원 수정
-- `DELETE /api/employees/{id}` — 직원 삭제(퇴사 처리)
+---
 
-### 부서(Department)
-- `GET /api/departments` — 부서 목록 조회
-- `POST /api/departments` — 부서 등록
-- `GET /api/departments/{id}` — 부서 상세 조회
-- `PATCH /api/departments/{id}` — 부서 수정
-- `DELETE /api/departments/{id}` — 부서 삭제
+네, 알겠습니다. 처음에 올려주신 순서 그대로 API 명세를 다시 정리해 드리겠습니다.
 
-### 파일(File)
-- `POST /api/files` — 파일 업로드
-- `GET /api/files/{id}/meta` — 파일 메타 조회
-- `GET /api/files/{id}/download` — 파일 다운로드
+---
 
-### 이력(Change Log)
-- `GET /api/change-logs` — 이력 목록 조회
-- `GET /api/change-logs/{id}/diffs` — 특정 이력 변경 상세 조회
+## 📑 API Endpoints
 
-### 데이터 백업(Backup)
-- `GET /api/backups` — 백업 이력 조회
-- `POST /api/backups` — 데이터 백업 생성
-- `GET /api/backups/latest` — 최근 백업 조회
+### 직원 (Employee)
+- `GET` **/api/employees**
+  - **설명**: 직원 목록 조회
+- `POST` **/api/employees**
+  - **설명**: 직원 등록
+- `GET` **/api/employees/{id}**
+  - **설명**: 직원 상세 조회
+- `DELETE` **/api/employees/{id}**
+  - **설명**: 직원 삭제
+- `PATCH` **/api/employees/{id}**
+  - **설명**: 직원 수정
+- `GET` **/api/employees/stats/trend**
+  - **설명**: 직원 수 추이 조회
+- `GET` **/api/employees/stats/distribution**
+  - **설명**: 직원 분포 조회
+- `GET` **/api/employees/count**
+  - **설명**: 직원 수 조회
 
+### 부서 관리 (Department Management)
+- `GET` **/api/departments**
+  - **설명**: 부서 목록 조회
+- `POST` **/api/departments**
+  - **설명**: 부서 등록
+- `GET` **/api/departments/{id}**
+  - **설명**: 부서 상세 조회
+- `DELETE` **/api/departments/{id}**
+  - **설명**: 부서 삭제
+- `PATCH` **/api/departments/{id}**
+  - **설명**: 부서 수정
+
+### 데이터 백업 관리 (Data Backup Management)
+- `GET` **/api/backups**
+  - **설명**: 데이터 백업 목록 조회
+- `POST` **/api/backups**
+  - **설명**: 데이터 백업 생성
+- `GET` **/api/backups/latest**
+  - **설명**: 최근 백업 정보 조회
+
+### 직원 정보 수정 이력 관리 (Employee Change Log Management)
+- `GET` **/api/change-logs**
+  - **설명**: 직원 정보 수정 이력 목록 조회
+- `GET` **/api/change-logs/{id}/diffs**
+  - **설명**: 직원 정보 수정 이력 상세 조회
+- `GET` **/api/change-logs/count**
+  - **설명**: 수정 이력 건수 조회
+
+### 파일 관리 (File Management)
+- `GET` **/api/files/{id}/download**
+  - **설명**: 파일 다운로드
+
+---
+
+## 📦 Schemas (Data Models)
+
+### 직원 관련 (Employee)
+- **EmployeeCreateRequest** (직원 등록 요청)
+  - `name`: `string`
+  - `email`: `string`
+  - `departmentId`: `integer`
+  - `position`: `string`
+  - `hireDate`: `string` (date)
+  - `memo`: `string`
+- **EmployeeUpdateRequest** (직원 수정 요청)
+  - `name`: `string`
+  - `email`: `string`
+  - `departmentId`: `integer`
+  - `position`: `string`
+  - `hireDate`: `string` (date)
+  - `status`: `string`
+  - `memo`: `string`
+- **EmployeeDto** (직원 정보)
+  - `id`: `integer`
+  - `name`: `string`
+  - `email`: `string`
+  - `employeeNumber`: `string`
+  - `departmentId`: `integer`
+  - `departmentName`: `string`
+  - `position`: `string`
+  - `hireDate`: `string` (date)
+  - `status`: `string`
+  - `profileImageId`: `integer`
+- **EmployeeTrendDto** (직원 수 추이 정보)
+  - `date`: `string` (date)
+  - `count`: `integer`
+  - `change`: `integer`
+  - `changeRate`: `number` (double)
+- **EmployeeDistributionDto** (직원 분포 정보)
+  - `groupKey`: `string`
+  - `count`: `integer`
+  - `percentage`: `number` (double)
+
+### 부서 관련 (Department)
+- **DepartmentCreateRequest** (부서 등록 요청)
+  - `name`: `string`
+  - `description`: `string`
+  - `establishedDate`: `string` (date)
+- **DepartmentUpdateRequest** (부서 수정 요청)
+  - `name`: `string`
+  - `description`: `string`
+  - `establishedDate`: `string` (date)
+- **DepartmentDto** (부서 정보)
+  - `id`: `integer`
+  - `name`: `string`
+  - `description`: `string`
+  - `establishedDate`: `string` (date)
+  - `employeeCount`: `integer`
+
+### 이력 및 백업 관련 (Log & Backup)
+- **ChangeLogDto** (수정 이력 정보)
+  - `id`: `integer`
+  - `type`: `string`
+  - `employeeNumber`: `string`
+  - `memo`: `string`
+  - `ipAddress`: `string`
+  - `at`: `string` (date-time)
+- **DiffDto** (수정 이력 상세 변경 내용)
+  - `propertyName`: `string`
+  - `before`: `string`
+  - `after`: `string`
+- **BackupDto** (데이터 백업 정보)
+  - `id`: `integer`
+  - `worker`: `string`
+  - `startedAt`: `string` (date-time)
+  - `endedAt`: `string` (date-time)
+  - `status`: `string`
+  - `fileId`: `integer`
+
+### 공통 응답 (Common Responses)
+- **ErrorResponse** (에러 응답)
+  - `timestamp`: `string` (date-time)
+  - `status`: `integer`
+  - `message`: `string`
+  - `details`: `string`
+- **CursorPageResponse...** (커서 기반 페이지 응답)
+  - `content`: `array<object>` (각 DTO 객체의 배열)
+  - `nextCursor`: `string`
+  - `nextIdAfter`: `integer`
+  - `size`: `integer`
+  - `totalElements`: `integer`
+  - `hasNext`: `boolean`
 ---
 
 ## 🛠 기술 스택 (Tech Stack)

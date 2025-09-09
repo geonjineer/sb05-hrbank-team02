@@ -2,6 +2,7 @@ package com.sprint.project.hrbank.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
@@ -14,12 +15,16 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "employees")
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@EntityListeners(AuditingEntityListener.class)
 public class Employee {
 
   @Id

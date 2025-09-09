@@ -14,7 +14,8 @@ public record EmployeeDto(
     String departmentName,
     String position,
     LocalDate hireDate,
-    EmployeeStatus status
+    EmployeeStatus status,
+    long profileImageId
 ) {
 
 }

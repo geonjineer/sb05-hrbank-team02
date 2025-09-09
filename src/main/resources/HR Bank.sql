@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS "change_logs"
 CREATE TABLE IF NOT EXISTS "departments"
 (
     "id"               BIGSERIAL PRIMARY KEY,
-    "name"             VARCHAR(100)  NOT NULL,
+    "name"             VARCHAR(100)  NOT NULL UNIQUE,
     "description"      VARCHAR(1000) NULL,
     "established_date" DATE          NOT NULL
 );

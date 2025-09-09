@@ -11,8 +11,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @ConfigurationPropertiesScan
 public class HrbankApplication {
 
-    public static void main(String[] args) {
-        SpringApplication.run(HrbankApplication.class, args);
-    }
+  public static void main(String[] args) {
+    SpringApplication.run(HrbankApplication.class, args);
+  }
 
 }

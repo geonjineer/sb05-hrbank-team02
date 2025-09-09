@@ -32,6 +32,7 @@ public class EmployeeService {
   private final EmployeeMapper employeeMapper;
   private final CursorCodec cursorCodec;
   private final CursorPageAssembler cursorPageAssembler;
+  private final FileRepository fileRepository;
 
   private static final Set<String> ALLOWED_SORT = Set.of("name", "employeeNumber", "hireDate");
 
@@ -125,9 +126,10 @@ public class EmployeeService {
         EmployeeDto::id,
         CursorPageResponse<EmployeeDto>::new
     );
+  }
 
   @Transactional
-  public EmployeeDto update(Long employeeId, EmployeeUpdateRequest) {
+  public EmployeeDto update(Long employeeId, EmployeeUpdateRequest request) {
     // 1. ID로 수정할 직원 엔티티 조회
     Employee employee = employeeRepository.findById(employeeId)
         .orElseThrow(() -> new NoSuchElementException("Employee not found with id: " + employeeId));

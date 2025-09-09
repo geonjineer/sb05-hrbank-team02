@@ -17,8 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-
-
 public class EmployeeService {
 
   private final EmployeeRepository employeeRepository; // employee db 관리자
@@ -27,7 +25,6 @@ public class EmployeeService {
 
   @Transactional
   public EmployeeDto create(EmployeeCreateRequest request) {
-
     String name = request.name();
     String email = request.email();
     String position = request.position();
@@ -39,7 +36,6 @@ public class EmployeeService {
 
     employeeRepository.save(employee);
     return employeeMapper.toDto(employee);
-
   }
 
   @Transactional

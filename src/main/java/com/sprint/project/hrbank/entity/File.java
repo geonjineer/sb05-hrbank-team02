@@ -15,7 +15,6 @@ import lombok.Getter;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "files")
@@ -30,12 +29,13 @@ public class File {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "file_name", length = 255, nullable = true)
+  //@Column의 length = 255이 기본값
+  @Column(name = "file_name")
   private String fileName;
 
   @Column(name = "content_type", length = 100)
   private String contentType;
 
-  @Column(nullable = true)
+  @Column()
   private long size;
 }

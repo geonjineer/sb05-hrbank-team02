@@ -1,9 +1,14 @@
 package com.sprint.project.hrbank.service;
 
+import com.sprint.project.hrbank.dto.employee.EmployeeDistributionDto;
+import com.sprint.project.hrbank.dto.employee.EmployeeDistributionSearchRequest;
+import com.sprint.project.hrbank.dto.employee.EmployeeGroupCountRow;
 import com.sprint.project.hrbank.dto.employee.EmployeeTrendDto;
 import com.sprint.project.hrbank.dto.employee.EmployeeTrendSearchRequest;
+import com.sprint.project.hrbank.entity.EmployeeStatus;
 import com.sprint.project.hrbank.repository.EmployeeRepository;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,6 +21,7 @@ public class EmployeeStatsService {
   private final EmployeeRepository employeeRepository;
 
   private static final Set<String> DATE_UNITS = Set.of("day", "week", "month", "quarter", "year");
+  private static final Set<String> GROUP_BY = Set.of("department", "position");
 
   @Transactional(readOnly = true)
   public EmployeeTrendDto getEmployeeTrend(EmployeeTrendSearchRequest request) {
@@ -36,6 +42,31 @@ public class EmployeeStatsService {
         .change(change)
         .changeRate(changeRate)
         .build();
+  }
+
+  @Transactional(readOnly = true)
+  public List<EmployeeDistributionDto> getEmployeeDistribution(
+      EmployeeDistributionSearchRequest request) {
+
+    String groupKey = GROUP_BY.contains(request.groupBy())
+        ? request.groupBy() : "department";
+    EmployeeStatus status = request.status() == null ? EmployeeStatus.ACTIVE : request.status();
+
+    long totalCount = employeeRepository.countTotalByStatus(status);
+    List<EmployeeGroupCountRow> rows = employeeRepository.searchCountByGroup(groupKey, status);
+
+    return rows.stream()
+        .map(r -> {
+          long count = r.count() == null ? 0 : r.count();
+          double percentage = totalCount == 0 ? 0.0
+              : Math.round((count * 100.0 / totalCount) * 10) / 10.0;
+          return EmployeeDistributionDto.builder()
+              .groupKey(r.groupKey())
+              .count(count)
+              .percentage(percentage)
+              .build();
+        })
+        .toList();
   }
 
   private LocalDate calculateFrom(String unit) {

@@ -5,8 +5,6 @@ import java.time.LocalDate;
 import lombok.Builder;
 
 @Builder
-
-
 public record EmployeeDto(
     long id,
     String name,
@@ -16,7 +14,8 @@ public record EmployeeDto(
     String departmentName,
     String position,
     LocalDate hireDate,
-    EmployeeStatus status
+    EmployeeStatus status,
+    long profileImageId
 ) {
 
 }

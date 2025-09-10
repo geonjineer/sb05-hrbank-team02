@@ -10,7 +10,6 @@ import jakarta.persistence.Table;
 import lombok.NoArgsConstructor;
 import lombok.Getter;
 
-
 @Entity
 @Table(name = "files")
 @Getter

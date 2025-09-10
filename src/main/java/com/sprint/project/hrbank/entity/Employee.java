@@ -14,12 +14,14 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "employees")
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
 public class Employee {
 
   @Id
@@ -54,7 +56,20 @@ public class Employee {
   @JoinColumn(name = "profile_image_id")
   private File profileImage;
 
-  public boolean update(String name, String email, LocalDate hireDate, String position, Department department, File profileImage) {
+  public Employee(String name, String email, LocalDate hireDate,
+      String position, Department department, File profileImage) {
+    this.name = name;
+    this.email = email;
+    this.hireDate = hireDate;
+    this.position = position;
+    this.department = department;
+    this.profileImage = profileImage;
+
+    this.status = EmployeeStatus.ACTIVE;
+  }
+
+  public boolean update(String name, String email, LocalDate hireDate, String position,
+      Department department, File profileImage) {
     boolean changed = false;
 
     if (this.name != null && !name.equals(this.name)) {

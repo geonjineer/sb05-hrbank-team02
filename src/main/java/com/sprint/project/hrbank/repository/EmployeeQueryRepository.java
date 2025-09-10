@@ -21,9 +21,9 @@ public interface EmployeeQueryRepository {
 
   Long searchCountByDate(LocalDate date);
 
-
   List<EmployeeGroupCountRow> searchCountByGroup(String groupKey, EmployeeStatus status);
 
   Long countTotalByStatus(EmployeeStatus status);
 
+  Long searchCountByDateBetween(EmployeeStatus status, LocalDate from, LocalDate to);
 }

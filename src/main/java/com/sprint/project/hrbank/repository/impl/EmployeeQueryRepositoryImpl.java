@@ -145,6 +145,21 @@ public class EmployeeQueryRepositoryImpl implements EmployeeQueryRepository {
         .fetchOne();
   }
 
+  @Override
+  public Long searchCountByDateBetween(EmployeeStatus status, LocalDate from, LocalDate to) {
+    BooleanBuilder where = new BooleanBuilder()
+        .and(e.hireDate.between(from, to));
+    if (status != null) {
+      where.and(e.status.eq(status));
+    }
+
+    return queryFactory
+        .select(e.id.count().coalesce(0L))
+        .from(e)
+        .where(where)
+        .fetchOne();
+  }
+
 
   private OrderSpecifier<?> buildPrimaryOrder(String sortField, boolean asc) {
     return switch (sortField) {

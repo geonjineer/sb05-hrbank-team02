@@ -1,6 +1,7 @@
 package com.sprint.project.hrbank.controller;
 
 import com.sprint.project.hrbank.dto.common.CursorPageResponse;
+import com.sprint.project.hrbank.dto.employee.EmployeeCountSearchRequest;
 import com.sprint.project.hrbank.dto.employee.EmployeeCreateRequest;
 import com.sprint.project.hrbank.dto.employee.EmployeeDistributionDto;
 import com.sprint.project.hrbank.dto.employee.EmployeeDistributionSearchRequest;
@@ -60,5 +61,12 @@ public class EmployeeController {
   public ResponseEntity<List<EmployeeDistributionDto>> findDistribution(
       @ModelAttribute EmployeeDistributionSearchRequest request) {
     return ResponseEntity.ok(employeeStatsService.getEmployeeDistribution(request));
+  }
+
+  @GetMapping("/count")
+  public ResponseEntity<Long> getEmployeeCount(
+      @ModelAttribute EmployeeCountSearchRequest request
+  ) {
+    return ResponseEntity.ok(employeeStatsService.getEmployeeCount(request));
   }
 }

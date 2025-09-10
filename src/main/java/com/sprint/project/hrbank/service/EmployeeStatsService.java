@@ -26,6 +26,7 @@ public class EmployeeStatsService {
 
   @Transactional(readOnly = true)
   public EmployeeTrendDto getEmployeeTrend(EmployeeTrendSearchRequest request) {
+
     String unit = DATE_UNITS.contains(request.unit())
         ? request.unit() : "month";
     LocalDate to = request.to() == null ? LocalDate.now() : request.to();
@@ -72,10 +73,22 @@ public class EmployeeStatsService {
 
   @Transactional(readOnly = true)
   public long getEmployeeCount(EmployeeCountSearchRequest request) {
-    return employeeRepository.searchCountByDate(request.to());
+    LocalDate from = request.fromDate() == null
+        ? LocalDate.of(1970, 1, 1)
+        : request.fromDate();
+    LocalDate to = request.toDate() == null
+        ? LocalDate.now()
+        : request.toDate();
+
+    if (from.isAfter(to)) {
+      throw new IllegalArgumentException("fromDate 는 toDate 이후일 수 없습니다.");
+    }
+
+    return employeeRepository.searchCountByDateBetween(request.employeeStatus(), from, to);
   }
 
   private LocalDate calculateFrom(String unit) {
+
     return switch (unit) {
       case "day" -> LocalDate.now().minusDays(12);
       case "week" -> LocalDate.now().minusWeeks(12);

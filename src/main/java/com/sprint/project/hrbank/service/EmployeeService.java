@@ -1,6 +1,7 @@
 package com.sprint.project.hrbank.service;
 
 import com.sprint.project.hrbank.dto.common.CursorPageResponse;
+import com.sprint.project.hrbank.dto.common.FileResponse;
 import com.sprint.project.hrbank.dto.employee.EmployeeCreateRequest;
 import com.sprint.project.hrbank.dto.employee.EmployeeDto;
 import com.sprint.project.hrbank.dto.employee.EmployeeSearchRequest;
@@ -38,15 +39,26 @@ public class EmployeeService {
   private static final Set<String> ALLOWED_SORT = Set.of("name", "employeeNumber", "hireDate");
 
   @Transactional
-  public EmployeeDto create(EmployeeCreateRequest request) {
+  public EmployeeDto create(EmployeeCreateRequest request, FileResponse profileResponse) {
     String name = request.name();
     String email = request.email();
     String position = request.position();
+
+    validateUniqueName(name);
+    validateUniqueEmail(email);
+
+    File profileImage = profileResponse == null
+        ? null
+        : fileRepository.findById(profileResponse.id())
+            .orElseThrow(() -> new NoSuchElementException(
+                "Profile image not found: " + profileResponse.id()));
+
     Department department = departmentRepository.findById(request.departmentId())
-        .orElseThrow(() -> new NoSuchElementException("Department not found"));
+        .orElseThrow(
+            () -> new NoSuchElementException("Department not found: " + request.departmentId()));
     LocalDate hireDate = request.hireDate();
 
-    Employee employee = new Employee(name, email, hireDate, position, department, null);
+    Employee employee = new Employee(name, email, hireDate, position, department, profileImage);
 
     employeeRepository.save(employee);
     return employeeMapper.toDto(employee);
@@ -171,4 +183,15 @@ public class EmployeeService {
 
   }
 
+  private void validateUniqueName(String name) {
+    if (employeeRepository.existsByName(name)) {
+      throw new IllegalArgumentException("Employee already exists with name: " + name);
+    }
+  }
+
+  private void validateUniqueEmail(String email) {
+    if (employeeRepository.existsByEmail(email)) {
+      throw new IllegalArgumentException("Employee already exists with email: " + email);
+    }
+  }
 }

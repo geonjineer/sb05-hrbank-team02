@@ -2,12 +2,14 @@ package com.sprint.project.hrbank.mapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Base64;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class CursorCodec {
 
-  private final ObjectMapper objectMapper = new ObjectMapper();
+  private final ObjectMapper objectMapper;
 
   public String encode(Object node) {
     try {

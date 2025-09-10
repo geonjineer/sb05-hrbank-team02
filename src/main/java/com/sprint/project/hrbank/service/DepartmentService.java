@@ -9,8 +9,6 @@ import com.sprint.project.hrbank.repository.DepartmentRepository;
 import com.sprint.project.hrbank.repository.EmployeeRepository;
 import java.time.LocalDate;
 import java.util.NoSuchElementException;
-
-import com.sprint.project.hrbank.repository.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,8 +20,6 @@ public class DepartmentService {
   private final DepartmentRepository departmentRepository;
   private final EmployeeRepository employeeRepository;
   private final DepartmentMapper departmentMapper;
-  private final EmployeeService employeeService;
-  private final EmployeeRepository employeeRepository;
 
   @Transactional
   public DepartmentDto create(DepartmentCreateRequest req) {
@@ -43,37 +39,41 @@ public class DepartmentService {
 
   @Transactional
   public DepartmentDto find(Long id) {
-     return departmentRepository.findById(id)
+    return departmentRepository.findById(id)
         .map(department -> {
           Long employeeCount = employeeRepository.countByDepartment(department);
           return departmentMapper.toDepartmentDto(department, employeeCount);
         }).orElse(null);
   }
+
   @Transactional
   public DepartmentDto update(Long id, DepartmentUpdateRequest request) {
     Department department = departmentRepository.findById(id)
-            .orElseThrow(() -> new NoSuchElementException("Department not found with id: " + id));
-    if (!department.getName().equals(request.name()) && departmentRepository.existsByName(request.name())) {
-      throw new IllegalArgumentException("Department with name " + request.name() + " already exists.");
+        .orElseThrow(() -> new NoSuchElementException("Department not found with id: " + id));
+    if (!department.getName().equals(request.name()) && departmentRepository.existsByName(
+        request.name())) {
+      throw new IllegalArgumentException(
+          "Department with name " + request.name() + " already exists.");
     }
 
     department.setName(request.name());
     department.setDescription(request.description());
     department.setEstablishedDate(request.establishedDate());
 
-    return departmentMapper.toDepartmentDto(department);
+    return departmentMapper.toDepartmentDto(department,
+        employeeRepository.countByDepartment(department));
   }
 
   @Transactional
   public void delete(Long id) {
     departmentRepository.findById(id)
-            .orElseThrow(() -> new
-                    NoSuchElementException("Department not found with id: "
-                    + id));
+        .orElseThrow(() -> new
+            NoSuchElementException("Department not found with id: "
+            + id));
 
     if (employeeRepository.existsByDepartmentId(id)) {
       throw new IllegalArgumentException("Deletion failed: Employees are still assigned to\n" +
-              "  this department.");
+          "  this department.");
     }
 
     // 3. 부서 삭제

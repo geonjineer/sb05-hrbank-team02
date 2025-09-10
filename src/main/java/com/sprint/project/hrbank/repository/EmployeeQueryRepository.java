@@ -1,7 +1,9 @@
 package com.sprint.project.hrbank.repository;
 
+import com.sprint.project.hrbank.dto.employee.EmployeeGroupCountRow;
 import com.sprint.project.hrbank.dto.employee.EmployeeSearchRequest;
 import com.sprint.project.hrbank.entity.Employee;
+import com.sprint.project.hrbank.entity.EmployeeStatus;
 import jakarta.annotation.Nullable;
 import java.time.LocalDate;
 import java.util.List;
@@ -19,5 +21,9 @@ public interface EmployeeQueryRepository {
 
   Long searchCountByDate(LocalDate date);
 
+
+  List<EmployeeGroupCountRow> searchCountByGroup(String groupKey, EmployeeStatus status);
+
+  Long countTotalByStatus(EmployeeStatus status);
 
 }

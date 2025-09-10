@@ -158,4 +158,17 @@ public class EmployeeService {
     // 4. 변경된 엔티티를 DTO로 변환하여 반환
     return employeeMapper.toDto(employee);
   }
+
+  @Transactional
+  public void delete(Long employeeId) { // 삭제할 직원 id 확인
+    boolean exists = employeeRepository.existsById(employeeId);
+    if (!exists) { // 삭제할 id 존재하지 않을 경우
+      throw new NoSuchElementException("Employee not found with id: " + employeeId); // 예외 처리 -> 에러 메세지 발생
+    }
+
+
+    employeeRepository.deleteById(employeeId); // 직원 아이디 삭제
+
+  }
+
 }

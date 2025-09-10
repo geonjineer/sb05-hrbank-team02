@@ -1,4 +1,4 @@
-package com.sprint.project.hrbank.controller;
+package com.sprint.project.hrbank.dto.common;
 
 import java.util.List;
 import lombok.Builder;

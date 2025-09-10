@@ -84,7 +84,7 @@ public class EmployeeQueryRepositoryImpl implements EmployeeQueryRepository {
   }
 
   @Override
-  public Long searchCount(LocalDate date) {
+  public Long searchCountByDate(LocalDate date) {
     BooleanBuilder where = new BooleanBuilder();
     if (date == null) {
       return 0L;

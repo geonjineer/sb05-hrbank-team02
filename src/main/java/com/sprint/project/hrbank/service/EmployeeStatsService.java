@@ -1,5 +1,6 @@
 package com.sprint.project.hrbank.service;
 
+import com.sprint.project.hrbank.dto.employee.EmployeeCountSearchRequest;
 import com.sprint.project.hrbank.dto.employee.EmployeeTrendDto;
 import com.sprint.project.hrbank.dto.employee.EmployeeTrendSearchRequest;
 import com.sprint.project.hrbank.repository.EmployeeRepository;
@@ -24,8 +25,8 @@ public class EmployeeStatsService {
     LocalDate to = request.to() == null ? LocalDate.now() : request.to();
     LocalDate from = request.from() == null ? calculateFrom(unit) : request.from();
 
-    long count = employeeRepository.searchCount(to);
-    long prev = employeeRepository.searchCount(from);
+    long count = employeeRepository.searchCountByDate(to);
+    long prev = employeeRepository.searchCountByDate(from);
     long change = count - prev;
     double changeRate = count == 0 ? 0.0
         : Math.round((change / (double) prev * 100) * 10) / 10.0;
@@ -36,6 +37,11 @@ public class EmployeeStatsService {
         .change(change)
         .changeRate(changeRate)
         .build();
+  }
+
+  @Transactional(readOnly = true)
+  public long getEmployeeCount(EmployeeCountSearchRequest request) {
+    return employeeRepository.searchCountByDate(request.to());
   }
 
   private LocalDate calculateFrom(String unit) {

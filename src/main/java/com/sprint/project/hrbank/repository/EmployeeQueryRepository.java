@@ -17,6 +17,7 @@ public interface EmployeeQueryRepository {
       @Nullable Long lastId
   );
 
-  Long searchCount(LocalDate date);
+  Long searchCountByDate(LocalDate date);
+
 
 }

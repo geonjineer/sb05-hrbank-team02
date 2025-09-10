@@ -1,7 +1,6 @@
 package com.sprint.project.hrbank.repository;
 
 import com.sprint.project.hrbank.dto.employee.EmployeeSearchRequest;
-import com.sprint.project.hrbank.dto.employee.EmployeeTrendSearchRequest;
 import com.sprint.project.hrbank.entity.Employee;
 import jakarta.annotation.Nullable;
 import java.time.LocalDate;

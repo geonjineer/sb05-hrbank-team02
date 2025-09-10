@@ -62,7 +62,7 @@ public class EmployeeService {
   @Transactional(readOnly = true)
   public CursorPageResponse<EmployeeDto> find(EmployeeSearchRequest request) {
     int raw = (request.size() == null || request.size() <= 0) ? 10 : request.size();
-    int size = Math.max(raw, 100); // 한 페이지에 담을 수 있는 최댓값을 100으로
+    int size = Math.min(raw, 100); // 한 페이지에 담을 수 있는 최댓값을 100으로
 
     if (request.hireDateFrom() != null && request.hireDateTo() != null
         && request.hireDateFrom().isAfter(request.hireDateTo())) {

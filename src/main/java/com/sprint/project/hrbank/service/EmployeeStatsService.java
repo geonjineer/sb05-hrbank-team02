@@ -1,5 +1,6 @@
 package com.sprint.project.hrbank.service;
 
+import com.sprint.project.hrbank.dto.employee.EmployeeCountSearchRequest;
 import com.sprint.project.hrbank.dto.employee.EmployeeDistributionDto;
 import com.sprint.project.hrbank.dto.employee.EmployeeDistributionSearchRequest;
 import com.sprint.project.hrbank.dto.employee.EmployeeGroupCountRow;
@@ -25,13 +26,14 @@ public class EmployeeStatsService {
 
   @Transactional(readOnly = true)
   public EmployeeTrendDto getEmployeeTrend(EmployeeTrendSearchRequest request) {
+
     String unit = DATE_UNITS.contains(request.unit())
         ? request.unit() : "month";
     LocalDate to = request.to() == null ? LocalDate.now() : request.to();
     LocalDate from = request.from() == null ? calculateFrom(unit) : request.from();
 
-    long count = employeeRepository.searchCount(to);
-    long prev = employeeRepository.searchCount(from);
+    long count = employeeRepository.searchCountByDate(to);
+    long prev = employeeRepository.searchCountByDate(from);
     long change = count - prev;
     double changeRate = count == 0 ? 0.0
         : Math.round((change / (double) prev * 100) * 10) / 10.0;
@@ -69,7 +71,24 @@ public class EmployeeStatsService {
         .toList();
   }
 
+  @Transactional(readOnly = true)
+  public long getEmployeeCount(EmployeeCountSearchRequest request) {
+    LocalDate from = request.fromDate() == null
+        ? LocalDate.of(1970, 1, 1)
+        : request.fromDate();
+    LocalDate to = request.toDate() == null
+        ? LocalDate.now()
+        : request.toDate();
+
+    if (from.isAfter(to)) {
+      throw new IllegalArgumentException("fromDate 는 toDate 이후일 수 없습니다.");
+    }
+
+    return employeeRepository.searchCountByDateBetween(request.employeeStatus(), from, to);
+  }
+
   private LocalDate calculateFrom(String unit) {
+
     return switch (unit) {
       case "day" -> LocalDate.now().minusDays(12);
       case "week" -> LocalDate.now().minusWeeks(12);

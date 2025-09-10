@@ -16,9 +16,10 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "departments")
-@Getter @Setter @Builder
+@Getter
+@Setter
+@Builder
 @AllArgsConstructor
-@NoArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Department {
 

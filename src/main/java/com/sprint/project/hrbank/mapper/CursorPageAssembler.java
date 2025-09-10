@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class CursorPageAssembler {
+
   private final CursorCodec cursorCodec;
 
   public <D, R> R assemble(

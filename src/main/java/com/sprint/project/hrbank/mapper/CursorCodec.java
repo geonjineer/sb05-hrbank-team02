@@ -13,7 +13,7 @@ public class CursorCodec {
     try {
       return Base64.getEncoder().encodeToString(objectMapper.writeValueAsBytes(node));
     } catch (Exception e) {
-        throw new IllegalArgumentException("cursor encoding failed", e);
+      throw new IllegalArgumentException("cursor encoding failed", e);
     }
   }
 
@@ -22,9 +22,11 @@ public class CursorCodec {
       byte[] bytes = Base64.getDecoder().decode(cursor);
       return objectMapper.readValue(bytes, type);
     } catch (Exception e) {
-        throw new IllegalArgumentException("유효하지 않은 cursor", e);
+      throw new IllegalArgumentException("유효하지 않은 cursor", e);
     }
   }
 
-  public record CursorPayload(String sortVal, Long id) {}
+  public record CursorPayload(String sortVal, Long id) {
+
+  }
 }

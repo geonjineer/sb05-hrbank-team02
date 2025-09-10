@@ -25,7 +25,7 @@ public class EmployeeController {
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<EmployeeDto> create(
       @RequestPart EmployeeCreateRequest request,
-      @RequestPart(required = false)MultipartFile profile) {
+      @RequestPart(required = false) MultipartFile profile) {
 
     return ResponseEntity.ok().body(employeeService.create(request));
   }

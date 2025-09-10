@@ -4,6 +4,7 @@ import java.util.List;
 
 @FunctionalInterface
 public interface CursorPageBuilder<R, D> {
+
   R build(
       List<D> content,
       String nextCursor,

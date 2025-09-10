@@ -1,9 +1,9 @@
-﻿DROP TABLE IF EXISTS "change_logs";
+﻿DROP TABLE IF EXISTS "employees";
+DROP TABLE IF EXISTS "change_logs";
 DROP TABLE IF EXISTS "departments";
 DROP TABLE IF EXISTS "files";
 DROP TABLE IF EXISTS "backups";
 DROP TABLE IF EXISTS "change_log_diffs";
-DROP TABLE IF EXISTS "employees";
 
 CREATE TABLE IF NOT EXISTS "change_logs"
 (
@@ -55,20 +55,31 @@ CREATE TABLE IF NOT EXISTS "change_log_diffs"
 );
 
 
+CREATE SEQUENCE IF NOT EXISTS employees_employee_number_seq START WITH 1 INCREMENT BY 1;
+
 CREATE TABLE IF NOT EXISTS "employees"
 (
     "id"               BIGSERIAL PRIMARY KEY,
-    "department_id"    BIGINT                       NULL,
-    "profile_image_id" BIGINT                       NULL,
-    "name"             VARCHAR(100)                 NOT NULL,
-    "email"            VARCHAR(100)                 NOT NULL UNIQUE,
-    "employee_number"  VARCHAR(100)                 NOT NULL UNIQUE,
-    "position"         VARCHAR(50)                  NULL,
-    "hire_date"        DATE                         NOT NULL,
-    "status"           VARCHAR(10) DEFAULT 'ACTIVE' NOT NULL CHECK (status IN ('ACTIVE', 'ON_LEAVE', 'RESIGNED')),
+    "department_id"    BIGINT       NULL,
+    "profile_image_id" BIGINT       NULL,
+    "name"             VARCHAR(100) NOT NULL,
+    "email"            VARCHAR(100) NOT NULL UNIQUE,
+    "employee_number"  TEXT       NOT NULL UNIQUE
+        DEFAULT lpad(NEXTVAL('employees_employee_number_seq')::TEXT, 8, '0'),
+    "position"         VARCHAR(50)  NULL,
+    "hire_date"        DATE         NOT NULL,
+    "status"           VARCHAR(10)                  DEFAULT 'ACTIVE' NOT NULL CHECK (status IN ('ACTIVE', 'ON_LEAVE', 'RESIGNED')),
     CONSTRAINT "FK_departments_TO_employees_1" FOREIGN KEY ("department_id")
         REFERENCES "departments" ("id") ON DELETE NO ACTION,
     CONSTRAINT "FK_files_TO_employees_1" FOREIGN KEY ("profile_image_id")
         REFERENCES "files" ("id")
 );
 
+-- 포멧 유효성 체크
+ALTER TABLE employees
+    ADD CONSTRAINT ck_employees_employee_number_format
+        CHECK (employee_number ~ '^\d{8}$');
+
+-- 깔끔한 라이프사이클을 위한 시퀀스 소유권 설정
+ALTER SEQUENCE employees_employee_number_seq
+    OWNED BY employees.employee_number;

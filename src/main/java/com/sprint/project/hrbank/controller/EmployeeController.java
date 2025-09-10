@@ -39,7 +39,7 @@ public class EmployeeController {
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<EmployeeDto> create(
       @RequestPart EmployeeCreateRequest request,
-      @RequestPart(required = false) MultipartFile profile) throws IOException {
+      @RequestPart(required = false) MultipartFile profile){
     FileResponse fileResponse = profile == null
         ? null
         : fileService.upload(profile);

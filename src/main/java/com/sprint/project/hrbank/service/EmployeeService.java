@@ -72,15 +72,15 @@ public class EmployeeService {
   }
 
   @Transactional
-  public EmployeeDto delete(Long employeeId) { // 삭제할 직원 id 확인
+  public void delete(Long employeeId) { // 삭제할 직원 id 확인
     boolean exists = employeeRepository.existsById(employeeId);
     if (!exists) { // 삭제할 id 존재하지 않을 경우
       throw new NoSuchElementException("Employee not found with id: " + employeeId); // 예외 처리 -> 에러 메세지 발생
     }
 
-    else {
-      employeeRepository.deleteById(employeeId); // 직원 아이디 삭제
-    }
+
+    employeeRepository.deleteById(employeeId); // 직원 아이디 삭제
+
   }
 
 }

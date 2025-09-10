@@ -71,6 +71,8 @@ public class EmployeeService {
 
   }
 
+  // 수정사항 반영했습니다.
+
   @Transactional
   public void delete(Long employeeId) { // 삭제할 직원 id 확인
     boolean exists = employeeRepository.existsById(employeeId);

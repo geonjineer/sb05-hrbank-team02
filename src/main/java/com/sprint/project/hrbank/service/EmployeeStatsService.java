@@ -25,9 +25,10 @@ public class EmployeeStatsService {
     LocalDate from = request.from() == null ? calculateFrom(unit) : request.from();
 
     long count = employeeRepository.searchCount(to);
-    long change = count - employeeRepository.searchCount(from);
+    long prev = employeeRepository.searchCount(from);
+    long change = count - prev;
     double changeRate = count == 0 ? 0.0
-        : Math.round((change / (double) count * 100) * 10) / 10.0;
+        : Math.round((change / (double) prev * 100) * 10) / 10.0;
 
     return EmployeeTrendDto.builder()
         .date(to)

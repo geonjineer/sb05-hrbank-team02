@@ -6,4 +6,6 @@ public record DepartmentUpdateRequest(
     String name,
     String description,
     LocalDate establishedDate
-) {}
+) {
+
+}

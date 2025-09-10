@@ -1,6 +1,5 @@
 package com.sprint.project.hrbank.service;
 
-import com.querydsl.core.Tuple;
 import com.sprint.project.hrbank.dto.employee.EmployeeDistributionDto;
 import com.sprint.project.hrbank.dto.employee.EmployeeDistributionSearchRequest;
 import com.sprint.project.hrbank.dto.employee.EmployeeGroupCountRow;
@@ -46,7 +45,8 @@ public class EmployeeStatsService {
   }
 
   @Transactional(readOnly = true)
-  public List<EmployeeDistributionDto> getEmployeeDistribution(EmployeeDistributionSearchRequest request) {
+  public List<EmployeeDistributionDto> getEmployeeDistribution(
+      EmployeeDistributionSearchRequest request) {
 
     String groupKey = GROUP_BY.contains(request.groupBy())
         ? request.groupBy() : "department";
@@ -57,9 +57,9 @@ public class EmployeeStatsService {
 
     return rows.stream()
         .map(r -> {
-          long count = r.count() ==  null ? 0 : r.count();
-          double percentage = totalCount ==  0 ? 0.0
-              : Math.round((count * 100.0 / totalCount) * 10)/10.0;
+          long count = r.count() == null ? 0 : r.count();
+          double percentage = totalCount == 0 ? 0.0
+              : Math.round((count * 100.0 / totalCount) * 10) / 10.0;
           return EmployeeDistributionDto.builder()
               .groupKey(r.groupKey())
               .count(count)

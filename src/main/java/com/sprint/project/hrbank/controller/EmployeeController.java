@@ -2,12 +2,15 @@ package com.sprint.project.hrbank.controller;
 
 import com.sprint.project.hrbank.dto.common.CursorPageResponse;
 import com.sprint.project.hrbank.dto.employee.EmployeeCreateRequest;
+import com.sprint.project.hrbank.dto.employee.EmployeeDistributionDto;
+import com.sprint.project.hrbank.dto.employee.EmployeeDistributionSearchRequest;
 import com.sprint.project.hrbank.dto.employee.EmployeeDto;
 import com.sprint.project.hrbank.dto.employee.EmployeeSearchRequest;
 import com.sprint.project.hrbank.dto.employee.EmployeeTrendDto;
 import com.sprint.project.hrbank.dto.employee.EmployeeTrendSearchRequest;
 import com.sprint.project.hrbank.service.EmployeeService;
 import com.sprint.project.hrbank.service.EmployeeStatsService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -51,5 +54,11 @@ public class EmployeeController {
   public ResponseEntity<EmployeeTrendDto> findTrend(
       @ModelAttribute EmployeeTrendSearchRequest request) {
     return ResponseEntity.ok(employeeStatsService.getEmployeeTrend(request));
+  }
+
+  @GetMapping("/stats/distribution")
+  public ResponseEntity<List<EmployeeDistributionDto>> findDistribution(
+      @ModelAttribute EmployeeDistributionSearchRequest request) {
+    return ResponseEntity.ok(employeeStatsService.getEmployeeDistribution(request));
   }
 }

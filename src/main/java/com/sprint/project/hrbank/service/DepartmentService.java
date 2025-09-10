@@ -10,7 +10,6 @@ import com.sprint.project.hrbank.repository.EmployeeRepository;
 import java.time.LocalDate;
 import java.util.NoSuchElementException;
 
-import com.sprint.project.hrbank.repository.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,8 +21,6 @@ public class DepartmentService {
   private final DepartmentRepository departmentRepository;
   private final EmployeeRepository employeeRepository;
   private final DepartmentMapper departmentMapper;
-  private final EmployeeService employeeService;
-  private final EmployeeRepository employeeRepository;
 
   @Transactional
   public DepartmentDto create(DepartmentCreateRequest req) {
@@ -49,6 +46,7 @@ public class DepartmentService {
           return departmentMapper.toDepartmentDto(department, employeeCount);
         }).orElse(null);
   }
+
   @Transactional
   public DepartmentDto update(Long id, DepartmentUpdateRequest request) {
     Department department = departmentRepository.findById(id)
@@ -61,17 +59,17 @@ public class DepartmentService {
     department.setDescription(request.description());
     department.setEstablishedDate(request.establishedDate());
 
-    return departmentMapper.toDepartmentDto(department);
+    return departmentMapper.toDepartmentDto(department, employeeRepository.countByDepartment(department));
   }
 
   @Transactional
   public void delete(Long id) {
-    departmentRepository.findById(id)
-            .orElseThrow(() -> new
-                    NoSuchElementException("Department not found with id: "
-                    + id));
+    Department department = departmentRepository.findById(id)
+        .orElseThrow(() -> new
+            NoSuchElementException("Department not found with id: "
+            + id));
 
-    if (employeeRepository.existsByDepartmentId(id)) {
+    if (employeeRepository.existsByDepartment(department)) {
       throw new IllegalArgumentException("Deletion failed: Employees are still assigned to\n" +
               "  this department.");
     }

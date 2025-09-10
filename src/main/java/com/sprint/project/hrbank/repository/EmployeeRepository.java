@@ -8,5 +8,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 public interface EmployeeRepository extends JpaRepository<Employee, Long>,
     JpaSpecificationExecutor<Employee>, EmployeeQueryRepository {
   Long countByDepartment(Department department);
+  boolean existsByDepartment(Department department);
 
 }

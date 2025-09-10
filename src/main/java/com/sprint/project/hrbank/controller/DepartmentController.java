@@ -35,6 +35,7 @@ public class DepartmentController {
         .status(HttpStatus.OK)
         .body(department);
   }
+
   @PatchMapping("/{id}")
   public ResponseEntity<DepartmentDto> update(
           @PathVariable Long id,

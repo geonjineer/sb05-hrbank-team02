@@ -39,7 +39,6 @@ public class Employee {
   private String email;
 
   @Column(updatable = false, nullable = false)
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private String employeeNumber;
 
   @Column(nullable = false)

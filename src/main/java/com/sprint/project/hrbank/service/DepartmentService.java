@@ -6,6 +6,7 @@ import com.sprint.project.hrbank.dto.department.DepartmentUpdateRequest;
 import com.sprint.project.hrbank.entity.Department;
 import com.sprint.project.hrbank.mapper.DepartmentMapper;
 import com.sprint.project.hrbank.repository.DepartmentRepository;
+import com.sprint.project.hrbank.repository.EmployeeRepository;
 import java.time.LocalDate;
 import java.util.NoSuchElementException;
 
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class DepartmentService {
 
   private final DepartmentRepository departmentRepository;
+  private final EmployeeRepository employeeRepository;
   private final DepartmentMapper departmentMapper;
   private final EmployeeService employeeService;
   private final EmployeeRepository employeeRepository;
@@ -32,16 +34,20 @@ public class DepartmentService {
     Department department = Department.builder()
         .name(name).description(description).establishedDate(establishedDate).build();
 
+    Long employeeCount = employeeRepository.countByDepartment(department);
     departmentRepository.save(department);
 
-    return departmentMapper.toDepartmentDto(department);
+    return departmentMapper.toDepartmentDto(department, employeeCount);
   }
 
 
   @Transactional
   public DepartmentDto find(Long id) {
-    return departmentRepository.findById(id)
-        .map(departmentMapper::toDepartmentDto).orElse(null);
+     return departmentRepository.findById(id)
+        .map(department -> {
+          Long employeeCount = employeeRepository.countByDepartment(department);
+          return departmentMapper.toDepartmentDto(department, employeeCount);
+        }).orElse(null);
   }
   @Transactional
   public DepartmentDto update(Long id, DepartmentUpdateRequest request) {

@@ -8,6 +8,7 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sprint.project.hrbank.dto.employee.EmployeeSearchRequest;
 import com.sprint.project.hrbank.entity.Employee;
+import com.sprint.project.hrbank.entity.EmployeeStatus;
 import com.sprint.project.hrbank.entity.QDepartment;
 import com.sprint.project.hrbank.entity.QEmployee;
 import com.sprint.project.hrbank.repository.EmployeeQueryRepository;
@@ -80,6 +81,24 @@ public class EmployeeQueryRepositoryImpl implements EmployeeQueryRepository {
         .orderBy(primary, tie)
         .limit(sizePlusOne)
         .fetch();
+  }
+
+  @Override
+  public Long searchCount(LocalDate date) {
+    BooleanBuilder where = new BooleanBuilder();
+    if (date == null) {
+      return 0L;
+    }
+
+    where.and(e.hireDate.loe(date));
+    // 휴직자와 퇴사자는 제외
+    where.and(e.status.eq(EmployeeStatus.ACTIVE));
+
+    return queryFactory
+        .select(e.count())
+        .from(e)
+        .where(where)
+        .fetchOne();
   }
 
   private OrderSpecifier<?> buildPrimaryOrder(String sortField, boolean asc) {

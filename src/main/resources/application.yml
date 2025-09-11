@@ -48,3 +48,11 @@ logging:
     # Spring Web
     org.springframework.web: trace
     org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
+
+server:
+  forward-headers-strategy: framework
+  tomcat:
+    remoteip:
+      remote-ip-header: x-forwarded-for
+      protocol-header: x-forwarded-proto
+      internal-proxies: 10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|127\.0\.0\.1

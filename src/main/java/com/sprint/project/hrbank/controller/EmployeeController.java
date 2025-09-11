@@ -14,8 +14,11 @@ import com.sprint.project.hrbank.dto.file.FileResponse;
 import com.sprint.project.hrbank.service.EmployeeService;
 import com.sprint.project.hrbank.service.EmployeeStatsService;
 import com.sprint.project.hrbank.service.FileService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -40,12 +43,16 @@ public class EmployeeController {
 
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<EmployeeDto> create(
-      @RequestPart EmployeeCreateRequest request,
-      @RequestPart(required = false) MultipartFile profile) {
+      @RequestPart @Valid EmployeeCreateRequest request,
+      @RequestPart(required = false) MultipartFile profile,
+      HttpServletRequest httpRequest) {
     FileResponse fileResponse = profile == null
         ? null
         : fileService.upload(profile);
-    return ResponseEntity.ok().body(employeeService.create(request, fileResponse));
+
+    return ResponseEntity
+        .status(HttpStatus.CREATED)
+        .body(employeeService.createWithLog(request, fileResponse, httpRequest.getRemoteAddr()));
   }
 
   @GetMapping("/{id}")
@@ -55,13 +62,13 @@ public class EmployeeController {
 
   @GetMapping
   public CursorPageResponse<EmployeeDto> findAll(
-      @ModelAttribute EmployeeSearchRequest request) {
+      @ModelAttribute @Valid EmployeeSearchRequest request) {
     return employeeService.find(request);
   }
 
   @GetMapping("/stats/trend")
   public ResponseEntity<EmployeeTrendDto> findTrend(
-      @ModelAttribute EmployeeTrendSearchRequest request) {
+      @ModelAttribute @Valid EmployeeTrendSearchRequest request) {
     return ResponseEntity.ok(employeeStatsService.getEmployeeTrend(request));
   }
 
@@ -73,7 +80,7 @@ public class EmployeeController {
 
   @GetMapping("/count")
   public ResponseEntity<Long> getEmployeeCount(
-      @ModelAttribute EmployeeCountSearchRequest request
+      @ModelAttribute @Valid EmployeeCountSearchRequest request
   ) {
     return ResponseEntity.ok(employeeStatsService.getEmployeeCount(request));
   }
@@ -81,21 +88,24 @@ public class EmployeeController {
   @PutMapping("/{id}")
   public ResponseEntity<EmployeeDto> update(
       @PathVariable long id,
-      @RequestPart EmployeeUpdateRequest request,
-      @RequestPart(required = false) MultipartFile profile
+      @RequestPart @Valid EmployeeUpdateRequest request,
+      @RequestPart(required = false) MultipartFile profile,
+      HttpServletRequest httpRequest
   ) {
     FileResponse fileResponse = profile == null
         ? null
         : fileService.upload(profile);
 
-    return ResponseEntity.ok(employeeService.update(id, request, fileResponse));
+    return ResponseEntity.ok(
+        employeeService.updateWithLog(id, request, fileResponse, httpRequest.getRemoteAddr()));
   }
 
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> delete(
-      @PathVariable long id
+      @PathVariable long id,
+      HttpServletRequest httpRequest
   ) {
-    employeeService.delete(id);
+    employeeService.deleteWithLog(id, httpRequest.getRemoteAddr());
     return ResponseEntity.noContent().build();
   }
 

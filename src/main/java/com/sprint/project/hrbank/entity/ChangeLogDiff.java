@@ -1,5 +1,6 @@
 package com.sprint.project.hrbank.entity;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -10,18 +11,15 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 @Table(name = "change_log_diffs")
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 @Getter
 public class ChangeLogDiff {
 
@@ -34,13 +32,20 @@ public class ChangeLogDiff {
 
   @JdbcTypeCode(SqlTypes.JSON)
   @Column(columnDefinition = "jsonb")
-  private String before;
+  private JsonNode before;
 
   @JdbcTypeCode(SqlTypes.JSON)
   @Column(columnDefinition = "jsonb")
-  private String after;
+  private JsonNode after;
 
+  @Setter
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "change_log_id")
   private ChangeLog changeLog;
+
+  public ChangeLogDiff(String propertyName, JsonNode before, JsonNode after) {
+    this.propertyName = propertyName;
+    this.before = before;
+    this.after = after;
+  }
 }

@@ -142,7 +142,8 @@ public class EmployeeService {
   }
 
   @Transactional
-  public EmployeeDto update(Long employeeId, EmployeeUpdateRequest request) {
+  public EmployeeDto update(Long employeeId, EmployeeUpdateRequest request,
+      FileResponse profileResponse) {
     // 1. ID로 수정할 직원 엔티티 조회
     Employee employee = employeeRepository.findById(employeeId)
         .orElseThrow(() -> new NoSuchElementException("Employee not found with id: " + employeeId));
@@ -152,7 +153,14 @@ public class EmployeeService {
         .orElseThrow(() -> new NoSuchElementException(
             "Department not found with id: " + request.departmentId()));
 
+    validateUniqueName(request.name());
+    validateUniqueEmail(request.email());
 
+    File profileImage = profileResponse == null
+        ? null
+        : fileRepository.findById(profileResponse.id())
+            .orElseThrow(() -> new NoSuchElementException(
+                "Profile image not found with id: " + profileResponse.id()));
 
     // 3. 엔티티 값을 DTO 값으로 변경 (더티 체킹 활용)
     employee.update(
@@ -160,8 +168,8 @@ public class EmployeeService {
         request.email(),
         request.hireDate(),
         request.position(),
-        department
-
+        department,
+        profileImage
     );
 
     // 4. 변경된 엔티티를 DTO로 변환하여 반환
@@ -177,7 +185,6 @@ public class EmployeeService {
     }
 
     employeeRepository.deleteById(employeeId); // 직원 아이디 삭제
-
   }
 
   private void validateUniqueName(String name) {

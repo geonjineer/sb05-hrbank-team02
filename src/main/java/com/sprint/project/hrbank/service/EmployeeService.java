@@ -1,5 +1,6 @@
 package com.sprint.project.hrbank.service;
 
+import com.sprint.project.hrbank.dto.changeLog.ChangeLogCreateRequest;
 import com.sprint.project.hrbank.dto.common.CursorPageResponse;
 import com.sprint.project.hrbank.dto.employee.EmployeeCreateRequest;
 import com.sprint.project.hrbank.dto.employee.EmployeeDto;
@@ -9,6 +10,7 @@ import com.sprint.project.hrbank.dto.file.FileResponse;
 import com.sprint.project.hrbank.entity.Department;
 import com.sprint.project.hrbank.entity.Employee;
 import com.sprint.project.hrbank.entity.File;
+import com.sprint.project.hrbank.mapper.ChangeLogCreateRequestMapper;
 import com.sprint.project.hrbank.mapper.CursorCodec;
 import com.sprint.project.hrbank.mapper.CursorCodec.CursorPayload;
 import com.sprint.project.hrbank.mapper.CursorPageAssembler;
@@ -35,6 +37,8 @@ public class EmployeeService {
   private final CursorCodec cursorCodec;
   private final CursorPageAssembler cursorPageAssembler;
   private final FileRepository fileRepository;
+  private final ChangeLogService changeLogService;
+  private final ChangeLogCreateRequestMapper changeLogCreateRequestMapper;
 
   private static final Set<String> ALLOWED_SORT = Set.of("name", "employeeNumber", "hireDate");
 
@@ -64,11 +68,20 @@ public class EmployeeService {
     return employeeMapper.toDto(employee);
   }
 
+  @Transactional
+  public EmployeeDto createWithLog(EmployeeCreateRequest request, FileResponse profileResponse,
+      String ip) {
+    EmployeeDto employeeDto = create(request, profileResponse);
+    ChangeLogCreateRequest logRequest = changeLogCreateRequestMapper.forCreate(employeeDto,
+        request.memo(), ip);
+    changeLogService.create(logRequest);
+
+    return employeeDto;
+  }
+
   @Transactional(readOnly = true)
   public EmployeeDto findById(Long id) {
-    return employeeMapper.toDto(employeeRepository.findById(id).orElseThrow(
-        () -> new NoSuchElementException("Employee not found with id: " + id)
-    ));
+    return employeeMapper.toDto(validateId(id));
   }
 
   @Transactional(readOnly = true)
@@ -145,8 +158,7 @@ public class EmployeeService {
   public EmployeeDto update(Long employeeId, EmployeeUpdateRequest request,
       FileResponse profileResponse) {
     // 1. ID로 수정할 직원 엔티티 조회
-    Employee employee = employeeRepository.findById(employeeId)
-        .orElseThrow(() -> new NoSuchElementException("Employee not found with id: " + employeeId));
+    Employee employee = validateId(employeeId);
 
     // 2. DTO에 담겨온 ID로 연관 엔티티(부서, 프로필 이미지) 조회
     Department department = departmentRepository.findById(request.departmentId())
@@ -177,12 +189,26 @@ public class EmployeeService {
   }
 
   @Transactional
-  public void delete(Long employeeId) { // 삭제할 직원 id 확인
-    boolean exists = employeeRepository.existsById(employeeId);
-    if (!exists) { // 삭제할 id 존재하지 않을 경우
-      throw new NoSuchElementException(
-          "Employee not found with id: " + employeeId); // 예외 처리 -> 에러 메세지 발생
-    }
+  public EmployeeDto updateWithLog(Long employeeId, EmployeeUpdateRequest request,
+      FileResponse profileResponse, String ip) {
+    EmployeeDto employeeBefore = employeeMapper.toDto(validateId(employeeId));
+
+    EmployeeDto employeeAfter = update(employeeId, request, profileResponse);
+
+    ChangeLogCreateRequest logRequest = changeLogCreateRequestMapper.forUpdate(employeeBefore,
+        employeeAfter,
+        request.memo(), ip);
+
+    changeLogService.create(logRequest);
+
+    return employeeBefore;
+  }
+
+  @Transactional
+  public void deleteWithLog(Long employeeId, String ip) { // 삭제할 직원 id 확인
+    EmployeeDto employeeBefore = employeeMapper.toDto(validateId(employeeId));
+    ChangeLogCreateRequest logRequest = changeLogCreateRequestMapper.forDelete(employeeBefore, ip);
+    changeLogService.create(logRequest);
 
     employeeRepository.deleteById(employeeId); // 직원 아이디 삭제
   }
@@ -197,5 +223,10 @@ public class EmployeeService {
     if (employeeRepository.existsByEmail(email)) {
       throw new IllegalArgumentException("Employee already exists with email: " + email);
     }
+  }
+
+  private Employee validateId(Long employeeId) {
+    return employeeRepository.findById(employeeId)
+        .orElseThrow(() -> new NoSuchElementException("Employee not found with id: " + employeeId));
   }
 }

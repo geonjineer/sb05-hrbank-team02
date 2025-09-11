@@ -71,7 +71,7 @@ public class GlobalExceptionHandler {
         ErrorResponse.builder().
             timestamp(Instant.now())
             .message("Method Argument Not Valid")
-            .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+            .status(HttpStatus.BAD_REQUEST.value())
             .details(safeDetail(e))
             .build()
     );
@@ -85,7 +85,7 @@ public class GlobalExceptionHandler {
         ErrorResponse.builder()
             .timestamp(Instant.now())
             .message("Type Mismatch")
-            .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+            .status(HttpStatus.BAD_REQUEST.value())
             .details(safeDetail(e))
             .build()
     );

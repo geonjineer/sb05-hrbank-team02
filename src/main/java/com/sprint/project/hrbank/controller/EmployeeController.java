@@ -9,11 +9,11 @@ import com.sprint.project.hrbank.dto.employee.EmployeeDto;
 import com.sprint.project.hrbank.dto.employee.EmployeeSearchRequest;
 import com.sprint.project.hrbank.dto.employee.EmployeeTrendDto;
 import com.sprint.project.hrbank.dto.employee.EmployeeTrendSearchRequest;
+import com.sprint.project.hrbank.dto.employee.EmployeeUpdateRequest;
 import com.sprint.project.hrbank.dto.file.FileResponse;
 import com.sprint.project.hrbank.service.EmployeeService;
 import com.sprint.project.hrbank.service.EmployeeStatsService;
 import com.sprint.project.hrbank.service.FileService;
-import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,7 +41,7 @@ public class EmployeeController {
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<EmployeeDto> create(
       @RequestPart EmployeeCreateRequest request,
-      @RequestPart(required = false) MultipartFile profile){
+      @RequestPart(required = false) MultipartFile profile) {
     FileResponse fileResponse = profile == null
         ? null
         : fileService.upload(profile);
@@ -79,22 +78,24 @@ public class EmployeeController {
     return ResponseEntity.ok(employeeStatsService.getEmployeeCount(request));
   }
 
-  // 수정사항 반영
-
   @PutMapping("/{id}")
-  public ResponseEntity<Void> update(
+  public ResponseEntity<EmployeeDto> update(
       @PathVariable long id,
-      @RequestBody EmployeeCreateRequest request
+      @RequestPart EmployeeUpdateRequest request,
+      @RequestPart(required = false) MultipartFile profile
   ) {
-    employeeService.update(id, request);
-    return ResponseEntity.noContent().build();
+    FileResponse fileResponse = profile == null
+        ? null
+        : fileService.upload(profile);
+
+    return ResponseEntity.ok(employeeService.update(id, request, fileResponse));
   }
 
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> delete(
       @PathVariable long id
   ) {
-    employeeService.deleteEmployee(id);
+    employeeService.delete(id);
     return ResponseEntity.noContent().build();
   }
 

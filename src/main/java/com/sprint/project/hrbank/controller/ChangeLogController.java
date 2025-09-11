@@ -6,6 +6,7 @@ import com.sprint.project.hrbank.dto.changeLog.ChangeLogSearchRequest;
 import com.sprint.project.hrbank.dto.changeLog.DiffDto;
 import com.sprint.project.hrbank.dto.common.CursorPageResponse;
 import com.sprint.project.hrbank.service.ChangeLogService;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +24,7 @@ public class ChangeLogController {
 
   @GetMapping
   public CursorPageResponse<ChangeLogDto> getChangeLogs(
-      @ModelAttribute ChangeLogSearchRequest request
+      @ModelAttribute @Valid ChangeLogSearchRequest request
   ) {
     return changeLogService.getChangeLogs(request);
   }

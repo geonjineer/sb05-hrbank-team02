@@ -99,4 +99,27 @@ public class FileService {
     String t = contentType.trim().toLowerCase();
     return t.matches("^[\\w!#$&^_.+-]+/[\\w!#$&^_.+-]+$") ? t : "application/octet-stream";
   }
+
+  // 서버에서 생성한 임시 파일을 파일 관리 규칙에 맞게 저장한다.
+  // 1. size 체크 -> File meta sava
+  // 2. storage/{id} 위치로 이동
+  @Transactional
+  public FileResponse saveLocal(Path tempFile, String fileName, String contentType) {
+    try {
+      long size = Files.size(tempFile);
+
+      File meta = new File(fileName, contentType, size);
+      meta = fileRepository.save(meta);
+
+      Path root = Path.of(storageRoot);
+      Files.createDirectories(root);
+
+      Path dest = root.resolve(String.valueOf(meta.getId()));
+      Files.move(tempFile, dest, StandardCopyOption.REPLACE_EXISTING);
+
+      return new FileResponse(meta.getId(), fileName, contentType, size);
+    } catch (IOException e) {
+      throw new FileStorageException("로컬 파일 저장 실패: " + tempFile, e);
+    }
+  }
 }

@@ -3,6 +3,7 @@ package com.sprint.project.hrbank.exception;
 import com.sprint.project.hrbank.dto.common.ErrorResponse;
 import java.time.Instant;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -64,29 +65,34 @@ public class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(Exception e) {
+  public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
     log.error("Method Argument Not Valid: {}", e.getMessage(), e);
+    String detail = e.getBindingResult().getFieldErrors().stream()
+        .map(error -> error.getField() + " " + error.getDefaultMessage())
+        .collect(Collectors.joining(", "));
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
         ErrorResponse.builder().
             timestamp(Instant.now())
             .message("Method Argument Not Valid")
             .status(HttpStatus.BAD_REQUEST.value())
-            .details(safeDetail(e))
+            .details(detail)
             .build()
     );
   }
 
   @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-  public ResponseEntity<ErrorResponse> handleTypeMismatchException(Exception e) {
+  public ResponseEntity<ErrorResponse> handleTypeMismatchException(MethodArgumentTypeMismatchException e) {
     log.error("Type Mismatch: {}", e.getMessage(), e);
+    String detail = String.format("Parameter '%s' should be of type %s", e.getName(),
+        e.getRequiredType() != null ? e.getRequiredType().getSimpleName() : "null");
 
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
         ErrorResponse.builder()
             .timestamp(Instant.now())
             .message("Type Mismatch")
             .status(HttpStatus.BAD_REQUEST.value())
-            .details(safeDetail(e))
+            .details(detail)
             .build()
     );
   }

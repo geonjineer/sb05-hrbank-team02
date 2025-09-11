@@ -13,7 +13,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Generated;
@@ -21,7 +20,6 @@ import org.hibernate.generator.EventType;
 
 @Entity
 @Table(name = "employees")
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 public class Employee {
@@ -52,7 +50,7 @@ public class Employee {
   private String position;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "department_id")
+  @JoinColumn(name = "department_id", nullable = false)
   private Department department;
 
   @OneToOne(fetch = FetchType.LAZY)
@@ -72,7 +70,8 @@ public class Employee {
   }
 
   public boolean update(String name, String email, LocalDate hireDate, String position,
-      Department department, File profileImage) {
+      Department department,
+      File profileImage) {
     boolean changed = false;
 
     if (this.name != null && !name.equals(this.name)) {

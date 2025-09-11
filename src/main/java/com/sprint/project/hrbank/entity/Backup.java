@@ -34,10 +34,10 @@ public class Backup {
   @Column(length = 50, nullable = false)
   private String worker;
 
-  @Column(name = "started_At", nullable = false)
+  @Column(name = "started_at", nullable = false)
   private OffsetDateTime startedAt;
 
-  @Column(name = "ended_At", nullable = false)
+  @Column(name = "ended_at", nullable = false)
   private OffsetDateTime endedAt;
 
   @Enumerated(EnumType.STRING)

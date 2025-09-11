@@ -1,7 +1,7 @@
 ﻿DROP TABLE IF EXISTS "change_log_diffs";
 DROP TABLE IF EXISTS "change_logs";
 DROP TABLE IF EXISTS "backups";
-DROP TABLE IF EXISTS "files";
+DROP TABLE IF EXISTS "files" CASCADE;
 DROP TABLE IF EXISTS "employees";
 DROP TABLE IF EXISTS "departments";
 

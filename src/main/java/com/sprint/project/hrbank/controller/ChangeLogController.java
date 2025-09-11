@@ -1,5 +1,6 @@
 package com.sprint.project.hrbank.controller;
 
+import com.sprint.project.hrbank.dto.changeLog.ChangeLogCountSearchRequest;
 import com.sprint.project.hrbank.dto.changeLog.ChangeLogDto;
 import com.sprint.project.hrbank.dto.changeLog.ChangeLogSearchRequest;
 import com.sprint.project.hrbank.dto.changeLog.DiffDto;
@@ -30,5 +31,12 @@ public class ChangeLogController {
   @GetMapping("/{id}/diffs")
   public List<DiffDto> getDiff(@PathVariable Long id) {
     return changeLogService.findDiffsByChangeLogId(id);
+  }
+
+  @GetMapping("/count")
+  public Long count(
+      @ModelAttribute ChangeLogCountSearchRequest request
+  ) {
+    return changeLogService.findCountByDateBetween(request);
   }
 }

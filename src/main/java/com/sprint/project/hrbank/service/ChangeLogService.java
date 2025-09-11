@@ -1,5 +1,6 @@
 package com.sprint.project.hrbank.service;
 
+import com.sprint.project.hrbank.dto.changeLog.ChangeLogCountSearchRequest;
 import com.sprint.project.hrbank.dto.changeLog.ChangeLogCreateRequest;
 import com.sprint.project.hrbank.dto.changeLog.ChangeLogDiffCreate;
 import com.sprint.project.hrbank.dto.changeLog.ChangeLogDto;
@@ -48,12 +49,18 @@ public class ChangeLogService {
     return changeLogMapper.toDto(changeLogRepository.save(changeLog));
   }
 
-  @Transactional
+  @Transactional(readOnly = true)
   public List<DiffDto> findDiffsByChangeLogId(Long id) {
     return validateId(id).getDiffs().stream()
         .map(changeLogDiffMapper::toDto)
         .toList();
   }
+
+  @Transactional(readOnly = true)
+  public Long findCountByDateBetween(ChangeLogCountSearchRequest request) {
+    return changeLogRepository.countChangeLogByAtBetween(request.fromDate(), request.toDate());
+  }
+
 
   private ChangeLog validateId(Long id) {
     return changeLogRepository.findById(id)

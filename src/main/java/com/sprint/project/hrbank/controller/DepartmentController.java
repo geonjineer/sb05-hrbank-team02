@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequiredArgsConstructor
@@ -46,9 +45,6 @@ public class DepartmentController {
   @GetMapping("/{id}")
   public ResponseEntity<DepartmentDto> findById(@PathVariable @Positive Long id) {
     DepartmentDto department = departmentService.find(id);
-    if (department == null) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Department not found");
-    }
     return ResponseEntity
         .status(HttpStatus.OK)
         .body(department);

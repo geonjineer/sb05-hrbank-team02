@@ -25,7 +25,7 @@ public class ChangeLogController {
   public CursorPageResponse<ChangeLogDto> getChangeLogs(
       @ModelAttribute ChangeLogSearchRequest request
   ) {
-    return null;
+    return changeLogService.getChangeLogs(request);
   }
 
   @GetMapping("/{id}/diffs")

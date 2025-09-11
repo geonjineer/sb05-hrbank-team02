@@ -5,8 +5,6 @@ import com.sprint.project.hrbank.dto.department.DepartmentCreateRequest;
 import com.sprint.project.hrbank.dto.department.DepartmentDto;
 import com.sprint.project.hrbank.dto.department.DepartmentSearchRequest;
 import com.sprint.project.hrbank.dto.department.DepartmentUpdateRequest;
-import com.sprint.project.hrbank.dto.employee.EmployeeDto;
-import com.sprint.project.hrbank.dto.employee.EmployeeSearchRequest;
 import com.sprint.project.hrbank.service.DepartmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

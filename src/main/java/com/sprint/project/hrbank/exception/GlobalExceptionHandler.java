@@ -6,8 +6,10 @@ import java.util.NoSuchElementException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
 @Slf4j
@@ -55,6 +57,34 @@ public class GlobalExceptionHandler {
         ErrorResponse.builder()
             .timestamp(Instant.now())
             .message("File Storage Error")
+            .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+            .details(safeDetail(e))
+            .build()
+    );
+  }
+
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(Exception e) {
+    log.error("Method Argument Not Valid: {}", e.getMessage(), e);
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+        ErrorResponse.builder().
+            timestamp(Instant.now())
+            .message("Method Argument Not Valid")
+            .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+            .details(safeDetail(e))
+            .build()
+    );
+  }
+
+  @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+  public ResponseEntity<ErrorResponse> handleTypeMismatchException(Exception e) {
+    log.error("Type Mismatch: {}", e.getMessage(), e);
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+        ErrorResponse.builder()
+            .timestamp(Instant.now())
+            .message("Type Mismatch")
             .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
             .details(safeDetail(e))
             .build()

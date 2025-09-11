@@ -68,4 +68,30 @@ INSERT INTO employees (department_id, name, email, position, hire_date, status) 
     (21, '이서준',   'lee.seo@example.com','부장',   '2018-04-23', 'ACTIVE');   -- 경영기획팀
 
 
+-- change_logs
+INSERT INTO change_logs (type, employee_number, memo,
+     ip_address, at) VALUES
+     ('CREATED', '00000001', '신규 직원 등록',
+      '192.168.1.100', '2021-04-15 09:00:00+09'),
+     ('CREATED', '00000002', '신규 직원 등록',
+      '192.168.1.101', '2020-08-20 10:30:00+09'),
+     ('CREATED', '00000003', '신규 직원 등록',
+      '192.168.1.102', '2019-11-05 14:20:00+09'),
+     -- 일부 직원들의 정보 수정 이력
+     ('UPDATED', '00000001', '부서 이동',
+      '192.168.1.105', '2022-01-15 14:30:00+09'),
+     ('UPDATED', '00000003', '직급 승진',
+      '192.168.1.106', '2022-03-01 11:00:00+09'),
+     ('UPDATED', '00000002', '이메일 변경',
+      '192.168.1.107', '2022-05-10 09:20:00+09');
 
+-- 앞서 INSERT한 change_logs 데이터(ID: 4, 5, 6)에 대한 상세 내역을 추가합니다.
+INSERT INTO change_log_diffs (property_name, before_value, after_value, change_log_id) VALUES
+-- change_log_id=4 (부서 이동)에 대한 내역
+('department', '"기획팀"', '"개발팀"', 4),
+
+-- change_log_id=5 (직급 승진)에 대한 내역
+('position', '"사원"', '"대리"', 5),
+
+-- change_log_id=6 (이메일 변경)에 대한 내역
+('email', '"kim02@example.com"', '"kim.new@example.com"', 6);

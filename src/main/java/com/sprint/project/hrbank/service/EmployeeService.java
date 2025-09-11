@@ -152,10 +152,7 @@ public class EmployeeService {
         .orElseThrow(() -> new NoSuchElementException(
             "Department not found with id: " + request.departmentId()));
 
-    File profileImage =
-        (request.profileImageId() != null) ? fileRepository.findById(request.profileImageId())
-            .orElseThrow(() -> new NoSuchElementException(
-                "File not found with id: " + request.profileImageId())) : null;
+
 
     // 3. 엔티티 값을 DTO 값으로 변경 (더티 체킹 활용)
     employee.update(
@@ -163,8 +160,8 @@ public class EmployeeService {
         request.email(),
         request.hireDate(),
         request.position(),
-        department,
-        profileImage
+        department
+
     );
 
     // 4. 변경된 엔티티를 DTO로 변환하여 반환

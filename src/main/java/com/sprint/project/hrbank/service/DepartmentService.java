@@ -35,6 +35,8 @@ public class DepartmentService {
 
   @Transactional
   public DepartmentDto create(DepartmentCreateRequest request) {
+    validateUniqueName(request.name());
+
     String name = request.name();
     String description = request.description();
     LocalDate establishedDate = request.establishedDate();
@@ -42,7 +44,7 @@ public class DepartmentService {
     Department department = Department.builder()
         .name(name).description(description).establishedDate(establishedDate).build();
 
-    Long employeeCount = 0L;
+    long employeeCount = 0L;
     departmentRepository.save(department);
 
     return departmentMapper.toDepartmentDto(department, employeeCount);
@@ -51,11 +53,9 @@ public class DepartmentService {
 
   @Transactional(readOnly = true)
   public DepartmentDto find(Long id) {
-    return departmentRepository.findById(id)
-        .map(department -> {
-          Long employeeCount = employeeRepository.countByDepartment(department);
-          return departmentMapper.toDepartmentDto(department, employeeCount);
-        }).orElse(null);
+    Department department = validateId(id);
+    Long employeeCount = employeeRepository.countByDepartment(department);
+    return departmentMapper.toDepartmentDto(department, employeeCount);
   }
 
   @Transactional(readOnly = true)
@@ -123,13 +123,8 @@ public class DepartmentService {
   
   @Transactional
   public DepartmentDto update(Long id, DepartmentUpdateRequest request) {
-    Department department = departmentRepository.findById(id)
-        .orElseThrow(() -> new NoSuchElementException("Department not found with id: " + id));
-    if (!department.getName().equals(request.name()) && departmentRepository.existsByName(
-        request.name())) {
-      throw new IllegalArgumentException(
-          "Department with name " + request.name() + " already exists.");
-    }
+    Department department = validateId(id);
+    validateUniqueName(request.name());
 
     department.setName(request.name());
     department.setDescription(request.description());
@@ -140,10 +135,7 @@ public class DepartmentService {
 
   @Transactional
   public void delete(Long id) {
-    Department department = departmentRepository.findById(id)
-        .orElseThrow(() -> new
-            NoSuchElementException("Department not found with id: "
-            + id));
+    Department department = validateId(id);
 
     if (employeeRepository.existsByDepartment(department)) {
       throw new IllegalArgumentException("Deletion failed: Employees are still assigned to\n" +
@@ -152,5 +144,16 @@ public class DepartmentService {
 
     // 3. 부서 삭제
     departmentRepository.deleteById(id);
+  }
+
+  private Department validateId(Long id) {
+    return departmentRepository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("Department not found with id: " + id));
+  }
+
+  private void validateUniqueName(String name) {
+    if (employeeRepository.existsByName(name)) {
+      throw new IllegalArgumentException("Department with name " + name + " already exists");
+    }
   }
 }

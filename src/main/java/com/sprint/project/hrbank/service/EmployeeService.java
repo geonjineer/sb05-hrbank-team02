@@ -86,9 +86,8 @@ public class EmployeeService {
 
   @Transactional(readOnly = true)
   public CursorPageResponse<EmployeeDto> find(EmployeeSearchRequest request) {
-    int raw = (request.size() == null || request.size() <= 0) ? 10 : request.size();
-    int size = Math.min(raw, 100); // 한 페이지에 담을 수 있는 최댓값을 100으로
-
+    int size = (request.size() == null || request.size() <= 0) ? 10 : request.size();
+    
     if (request.hireDateFrom() != null && request.hireDateTo() != null
         && request.hireDateFrom().isAfter(request.hireDateTo())) {
       throw new IllegalArgumentException("hireDateFrom이 hireDateTo보다 이후일 수 없습니다.");

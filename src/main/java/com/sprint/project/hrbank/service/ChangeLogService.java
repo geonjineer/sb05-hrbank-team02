@@ -1,12 +1,11 @@
 package com.sprint.project.hrbank.service;
 
+import com.sprint.project.hrbank.dto.changeLog.ChangeLogCreateRequest;
 import com.sprint.project.hrbank.dto.changeLog.ChangeLogDiffCreate;
 import com.sprint.project.hrbank.dto.changeLog.ChangeLogDto;
-import com.sprint.project.hrbank.dto.changeLog.ChangeLogCreateRequest;
 import com.sprint.project.hrbank.entity.ChangeLog;
 import com.sprint.project.hrbank.entity.ChangeLogDiff;
 import com.sprint.project.hrbank.mapper.ChangeLogMapper;
-import com.sprint.project.hrbank.repository.ChangeLogDiffRepository;
 import com.sprint.project.hrbank.repository.ChangeLogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class ChangeLogService {
 
   private final ChangeLogRepository changeLogRepository;
-  private final ChangeLogDiffRepository changeLogDiffRepository;
   private final ChangeLogMapper changeLogMapper;
 
   @Transactional

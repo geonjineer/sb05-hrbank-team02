@@ -15,6 +15,7 @@ import com.sprint.project.hrbank.service.EmployeeService;
 import com.sprint.project.hrbank.service.EmployeeStatsService;
 import com.sprint.project.hrbank.service.FileService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -42,7 +43,7 @@ public class EmployeeController {
 
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<EmployeeDto> create(
-      @RequestPart EmployeeCreateRequest request,
+      @RequestPart @Valid EmployeeCreateRequest request,
       @RequestPart(required = false) MultipartFile profile,
       HttpServletRequest httpRequest) {
     FileResponse fileResponse = profile == null
@@ -61,13 +62,13 @@ public class EmployeeController {
 
   @GetMapping
   public CursorPageResponse<EmployeeDto> findAll(
-      @ModelAttribute EmployeeSearchRequest request) {
+      @ModelAttribute @Valid EmployeeSearchRequest request) {
     return employeeService.find(request);
   }
 
   @GetMapping("/stats/trend")
   public ResponseEntity<EmployeeTrendDto> findTrend(
-      @ModelAttribute EmployeeTrendSearchRequest request) {
+      @ModelAttribute @Valid EmployeeTrendSearchRequest request) {
     return ResponseEntity.ok(employeeStatsService.getEmployeeTrend(request));
   }
 
@@ -79,7 +80,7 @@ public class EmployeeController {
 
   @GetMapping("/count")
   public ResponseEntity<Long> getEmployeeCount(
-      @ModelAttribute EmployeeCountSearchRequest request
+      @ModelAttribute @Valid EmployeeCountSearchRequest request
   ) {
     return ResponseEntity.ok(employeeStatsService.getEmployeeCount(request));
   }
@@ -87,7 +88,7 @@ public class EmployeeController {
   @PutMapping("/{id}")
   public ResponseEntity<EmployeeDto> update(
       @PathVariable long id,
-      @RequestPart EmployeeUpdateRequest request,
+      @RequestPart @Valid EmployeeUpdateRequest request,
       @RequestPart(required = false) MultipartFile profile,
       HttpServletRequest httpRequest
   ) {

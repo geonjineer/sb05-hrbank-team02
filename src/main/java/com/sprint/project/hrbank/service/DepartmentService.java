@@ -120,7 +120,7 @@ public class DepartmentService {
     );
 
   }
-  
+
   @Transactional
   public DepartmentDto update(Long id, DepartmentUpdateRequest request) {
     Department department = validateId(id);

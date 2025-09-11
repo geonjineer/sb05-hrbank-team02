@@ -43,3 +43,45 @@ INSERT INTO departments (name, description, established_date) VALUES
    '2021-05-10');
 
 
+-- employees 데이터
+INSERT INTO employees (department_id, name, email, position, hire_date, status) VALUES
+    (1,  '홍길동',   'hong@example.com',   '주임',   '2021-04-15', 'ACTIVE'),   -- 개발팀
+    (2,  '김철수',   'kim@example.com',    '대리',   '2020-08-20', 'ACTIVE'),   -- 인사팀
+    (3,  '이영희',   'lee@example.com',    '과장',   '2019-11-05', 'ACTIVE'),   -- 마케팅팀
+    (4,  '박민수',   'park@example.com',   '사원',   '2022-01-10', 'ACTIVE'),   -- 영업팀
+    (5,  '최수진',   'choi@example.com',   '차장',   '2018-07-01', 'ACTIVE'),   -- 기획팀
+    (6,  '정우성',   'jung@example.com',   '부장',   '2017-05-22', 'ACTIVE'),   -- 재무팀
+    (7,  '한가영',   'han@example.com',    '사원',   '2021-09-14', 'ACTIVE'),   -- 총무팀
+    (8,  '오지훈',   'oh@example.com',     '대리',   '2020-06-03', 'ACTIVE'),   -- IT팀
+    (9,  '서지혜',   'seo@example.com',    '과장',   '2019-03-28', 'ACTIVE'),   -- 품질관리팀
+    (10, '양현석',   'yang@example.com',   '사원',   '2022-02-11', 'ACTIVE'),   -- 고객서비스팀
+    (11, '강민호',   'kang@example.com',   '대리',   '2021-07-20', 'ACTIVE'),   -- 구매팀
+    (12, '신은주',   'shin@example.com',   '과장',   '2019-05-16', 'ACTIVE'),   -- 생산팀
+    (13, '조윤아',   'cho@example.com',    '사원',   '2022-03-05', 'ACTIVE'),   -- 디자인팀
+    (14, '배성훈',   'bae@example.com',    '차장',   '2018-09-11', 'ACTIVE'),   -- 법무팀
+    (15, '임하늘',   'lim@example.com',    '대리',   '2020-10-22', 'ACTIVE'),   -- 홍보팀
+    (16, '문지호',   'moon@example.com',   '연구원', '2021-12-02', 'ACTIVE'),   -- 연구개발팀
+    (17, '장유진',   'jang@example.com',   '사원',   '2022-06-19', 'ACTIVE'),   -- 물류팀
+    (18, '황지민',   'hwang@example.com',  '대리',   '2020-08-30', 'ACTIVE'),   -- 보안팀
+    (19, '권수연',   'kwon@example.com',   '사원',   '2021-11-08', 'ACTIVE'),   -- 교육훈련팀
+    (20, '유재석',   'yoo@example.com',    '과장',   '2019-02-17', 'ACTIVE'),   -- 감사팀
+    (21, '이서준',   'lee.seo@example.com','부장',   '2018-04-23', 'ACTIVE');   -- 경영기획팀
+
+
+-- change_logs
+INSERT INTO change_logs (type, employee_number, memo,
+     ip_address, at) VALUES
+     ('CREATED', '00000001', '신규 직원 등록',
+      '192.168.1.100', '2021-04-15 09:00:00+09'),
+     ('CREATED', '00000002', '신규 직원 등록',
+      '192.168.1.101', '2020-08-20 10:30:00+09'),
+     ('CREATED', '00000003', '신규 직원 등록',
+      '192.168.1.102', '2019-11-05 14:20:00+09'),
+     -- 일부 직원들의 정보 수정 이력
+     ('UPDATED', '00000001', '부서 이동',
+      '192.168.1.105', '2022-01-15 14:30:00+09'),
+     ('UPDATED', '00000003', '직급 승진',
+      '192.168.1.106', '2022-03-01 11:00:00+09'),
+     ('UPDATED', '00000002', '이메일 변경',
+      '192.168.1.107', '2022-05-10 09:20:00+09');
+

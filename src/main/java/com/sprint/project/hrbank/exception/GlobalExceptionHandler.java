@@ -23,36 +23,41 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorResponse> handleBadRequest(Exception e) {
     log.warn("Bad Request: {}", e.getMessage(), e);
 
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorResponse.builder()
-        .timestamp(Instant.now())
-        .message("Bad Request")
-        .status(HttpStatus.BAD_REQUEST.value())
-        .details(safeDetail(e))
-        .build());
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+        ErrorResponse.builder().timestamp(Instant.now()).message("Bad Request")
+            .status(HttpStatus.BAD_REQUEST.value()).details(safeDetail(e)).build());
   }
 
   @ExceptionHandler(NoSuchElementException.class)
   public ResponseEntity<ErrorResponse> handleNotFound(Exception e) {
     log.warn("Not Found: {}", e.getMessage(), e);
 
-    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder()
-        .timestamp(Instant.now())
-        .message("Not Found")
-        .status(HttpStatus.NOT_FOUND.value())
-        .details(safeDetail(e))
-        .build());
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+        ErrorResponse.builder().timestamp(Instant.now()).message("Not Found")
+            .status(HttpStatus.NOT_FOUND.value()).details(safeDetail(e)).build());
   }
 
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ErrorResponse> handleServerError(Exception e) {
     log.error("Internal Server Error: {}", e.getMessage(), e);
 
-    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.builder()
-        .timestamp(Instant.now())
-        .message("Internal Server Error")
-        .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-        .details(safeDetail(e))
-        .build());
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+        ErrorResponse.builder().timestamp(Instant.now()).message("Internal Server Error")
+            .status(HttpStatus.INTERNAL_SERVER_ERROR.value()).details(safeDetail(e)).build());
   }
 
+  //FileStorageException 처리 추가
+  @ExceptionHandler(FileStorageException.class)
+  public ResponseEntity<ErrorResponse> handleFileStorageException(Exception e) {
+    log.error("File Storage Error: {}", e.getMessage(), e);
+
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+        ErrorResponse.builder()
+            .timestamp(Instant.now())
+            .message("File Storage Error")
+            .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+            .details(safeDetail(e))
+            .build()
+    );
+  }
 }

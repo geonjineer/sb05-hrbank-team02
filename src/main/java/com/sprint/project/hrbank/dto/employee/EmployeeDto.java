@@ -10,7 +10,7 @@ public record EmployeeDto(
     String name,
     String email,
     String employeeNumber,
-    Long departmentId,
+    String departmentId,
     String departmentName,
     String position,
     LocalDate hireDate,

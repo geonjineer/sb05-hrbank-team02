@@ -1,8 +1,12 @@
 package com.sprint.project.hrbank.controller;
 
+import com.sprint.project.hrbank.dto.common.CursorPageResponse;
 import com.sprint.project.hrbank.dto.department.DepartmentCreateRequest;
 import com.sprint.project.hrbank.dto.department.DepartmentDto;
+import com.sprint.project.hrbank.dto.department.DepartmentSearchRequest;
 import com.sprint.project.hrbank.dto.department.DepartmentUpdateRequest;
+import com.sprint.project.hrbank.dto.employee.EmployeeDto;
+import com.sprint.project.hrbank.dto.employee.EmployeeSearchRequest;
 import com.sprint.project.hrbank.service.DepartmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,7 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/departments")// 1234
+@RequestMapping("/api/departments")
 public class DepartmentController {
 
   private final DepartmentService departmentService;
@@ -30,6 +34,12 @@ public class DepartmentController {
     return ResponseEntity
         .status(HttpStatus.CREATED)
         .body(created);
+  }
+
+  @GetMapping
+  public CursorPageResponse<DepartmentDto> findAll(
+      @ModelAttribute DepartmentSearchRequest request) {
+    return departmentService.findAll(request);
   }
 
   @GetMapping("/{id}")

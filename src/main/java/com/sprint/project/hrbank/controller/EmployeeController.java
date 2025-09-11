@@ -1,7 +1,6 @@
 package com.sprint.project.hrbank.controller;
 
 import com.sprint.project.hrbank.dto.common.CursorPageResponse;
-import com.sprint.project.hrbank.dto.common.FileResponse;
 import com.sprint.project.hrbank.dto.employee.EmployeeCountSearchRequest;
 import com.sprint.project.hrbank.dto.employee.EmployeeCreateRequest;
 import com.sprint.project.hrbank.dto.employee.EmployeeDistributionDto;
@@ -10,6 +9,7 @@ import com.sprint.project.hrbank.dto.employee.EmployeeDto;
 import com.sprint.project.hrbank.dto.employee.EmployeeSearchRequest;
 import com.sprint.project.hrbank.dto.employee.EmployeeTrendDto;
 import com.sprint.project.hrbank.dto.employee.EmployeeTrendSearchRequest;
+import com.sprint.project.hrbank.dto.file.FileResponse;
 import com.sprint.project.hrbank.service.EmployeeService;
 import com.sprint.project.hrbank.service.EmployeeStatsService;
 import com.sprint.project.hrbank.service.FileService;
@@ -42,7 +42,7 @@ public class EmployeeController {
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<EmployeeDto> create(
       @RequestPart EmployeeCreateRequest request,
-      @RequestPart(required = false) MultipartFile profile) throws IOException {
+      @RequestPart(required = false) MultipartFile profile){
     FileResponse fileResponse = profile == null
         ? null
         : fileService.upload(profile);

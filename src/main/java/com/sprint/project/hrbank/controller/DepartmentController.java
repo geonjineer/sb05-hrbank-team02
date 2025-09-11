@@ -24,7 +24,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/departments")// 1234
+@RequestMapping("/api/departments")
 public class DepartmentController {
 
   private final DepartmentService departmentService;

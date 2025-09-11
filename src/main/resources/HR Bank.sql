@@ -1,9 +1,9 @@
-﻿DROP TABLE IF EXISTS "employees";
+﻿DROP TABLE IF EXISTS "change_log_diffs";
 DROP TABLE IF EXISTS "change_logs";
-DROP TABLE IF EXISTS "departments";
-DROP TABLE IF EXISTS "files";
 DROP TABLE IF EXISTS "backups";
-DROP TABLE IF EXISTS "change_log_diffs";
+DROP TABLE IF EXISTS "files";
+DROP TABLE IF EXISTS "employees";
+DROP TABLE IF EXISTS "departments";
 
 CREATE TABLE IF NOT EXISTS "change_logs"
 (
@@ -11,16 +11,19 @@ CREATE TABLE IF NOT EXISTS "change_logs"
     "type"            VARCHAR(10)  NOT NULL CHECK (type IN ('CREATED', 'UPDATED', 'DELETED')),
     "employee_number" VARCHAR(100) NOT NULL,
     "memo"            VARCHAR(500) NULL,
-    "ip_address"      VARCHAR(50)  NOT NULL,
-    "at"              timestamptz  NOT NULL
+    "ip_address"      inet         NOT NULL,
+    "at"              timestamptz  NOT NULL DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS "departments"
+CREATE TABLE IF NOT EXISTS "change_log_diffs"
 (
-    "id"               BIGSERIAL PRIMARY KEY,
-    "name"             VARCHAR(100)  NOT NULL UNIQUE,
-    "description"      VARCHAR(1000) NULL,
-    "established_date" DATE          NOT NULL
+    "id"            BIGSERIAL PRIMARY KEY,
+    "change_log_id" BIGINT       NOT NULL,
+    "property_name" VARCHAR(100) NULL,
+    "before"        jsonb        NULL,
+    "after"         jsonb        NULL,
+    CONSTRAINT "FK_change_logs_TO_change_log_diffs_1" FOREIGN KEY ("change_log_id")
+        REFERENCES "change_logs" ("id") ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS "files"
@@ -43,32 +46,31 @@ CREATE TABLE IF NOT EXISTS "backups"
         REFERENCES "files" ("id")
 );
 
-CREATE TABLE IF NOT EXISTS "change_log_diffs"
+CREATE TABLE IF NOT EXISTS "departments"
 (
-    "id"            BIGSERIAL PRIMARY KEY,
-    "change_log_id" BIGINT       NOT NULL,
-    "property_name" VARCHAR(10)  NULL,
-    "before"        VARCHAR(500) NULL,
-    "after"         VARCHAR(500) NULL,
-    CONSTRAINT "FK_change_logs_TO_change_log_diffs_1" FOREIGN KEY ("change_log_id")
-        REFERENCES "change_logs" ("id") ON DELETE CASCADE
+    "id"               BIGSERIAL PRIMARY KEY,
+    "name"             VARCHAR(100)  NOT NULL UNIQUE,
+    "description"      VARCHAR(1000) NULL,
+    "established_date" DATE          NOT NULL
 );
 
+DROP SEQUENCE IF EXISTS employees_employee_number_seq;
 
 CREATE SEQUENCE IF NOT EXISTS employees_employee_number_seq START WITH 1 INCREMENT BY 1;
 
 CREATE TABLE IF NOT EXISTS "employees"
 (
     "id"               BIGSERIAL PRIMARY KEY,
-    "department_id"    BIGINT       NULL,
+    "department_id"    BIGINT       NOT NULL,
     "profile_image_id" BIGINT       NULL,
     "name"             VARCHAR(100) NOT NULL,
     "email"            VARCHAR(100) NOT NULL UNIQUE,
-    "employee_number"  TEXT       NOT NULL UNIQUE
-        DEFAULT lpad(NEXTVAL('employees_employee_number_seq')::TEXT, 8, '0'),
+    "employee_number"  TEXT         NOT NULL UNIQUE
+                                   DEFAULT LPAD(NEXTVAL('employees_employee_number_seq')::TEXT, 8,
+                                                '0'),
     "position"         VARCHAR(50)  NULL,
     "hire_date"        DATE         NOT NULL,
-    "status"           VARCHAR(10)                  DEFAULT 'ACTIVE' NOT NULL CHECK (status IN ('ACTIVE', 'ON_LEAVE', 'RESIGNED')),
+    "status"           VARCHAR(10) DEFAULT 'ACTIVE' NOT NULL CHECK (status IN ('ACTIVE', 'ON_LEAVE', 'RESIGNED')),
     CONSTRAINT "FK_departments_TO_employees_1" FOREIGN KEY ("department_id")
         REFERENCES "departments" ("id") ON DELETE NO ACTION,
     CONSTRAINT "FK_files_TO_employees_1" FOREIGN KEY ("profile_image_id")

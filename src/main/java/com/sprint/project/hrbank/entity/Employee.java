@@ -2,7 +2,6 @@ package com.sprint.project.hrbank.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
@@ -17,14 +16,14 @@ import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
 
 @Entity
 @Table(name = "employees")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-@EntityListeners(AuditingEntityListener.class)
 public class Employee {
 
   @Id
@@ -38,7 +37,8 @@ public class Employee {
   @Column(nullable = false)
   private String email;
 
-  @Column(updatable = false, nullable = false)
+  @Column(updatable = false, nullable = false, insertable = false)
+  @Generated(event = EventType.INSERT)
   private String employeeNumber;
 
   @Column(nullable = false)

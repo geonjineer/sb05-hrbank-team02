@@ -1,4 +1,4 @@
-package com.sprint.project.hrbank.Specification;
+package com.sprint.project.hrbank.specification;
 
 import com.sprint.project.hrbank.entity.Employee;
 import com.sprint.project.hrbank.entity.EmployeeStatus;

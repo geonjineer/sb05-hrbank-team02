@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface DepartmentRepository extends JpaRepository<Department, Long>, DepartmentQueryRepository {
 
-    boolean existsByName(String name);
+  boolean existsByName(String name);
 }

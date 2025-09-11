@@ -3,9 +3,13 @@ package com.sprint.project.hrbank.repository.impl;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.sprint.project.hrbank.dto.employee.EmployeeGroupCountRow;
 import com.sprint.project.hrbank.dto.employee.EmployeeSearchRequest;
 import com.sprint.project.hrbank.entity.Employee;
 import com.sprint.project.hrbank.entity.EmployeeStatus;
@@ -84,7 +88,7 @@ public class EmployeeQueryRepositoryImpl implements EmployeeQueryRepository {
   }
 
   @Override
-  public Long searchCount(LocalDate date) {
+  public Long searchCountByDate(LocalDate date) {
     BooleanBuilder where = new BooleanBuilder();
     if (date == null) {
       return 0L;
@@ -100,6 +104,62 @@ public class EmployeeQueryRepositoryImpl implements EmployeeQueryRepository {
         .where(where)
         .fetchOne();
   }
+
+  @Override
+  public List<EmployeeGroupCountRow> searchCountByGroup(String groupKey, EmployeeStatus status) {
+
+    StringExpression keyExpr = groupKey.equals("position")
+        ? e.position
+        : e.department.name;
+
+    NumberExpression<Long> countExpr = e.id.count().coalesce(0L);
+
+    BooleanBuilder where = new BooleanBuilder();
+    if (status != null) {
+      where.and(e.status.eq(status));
+    }
+
+    return queryFactory
+        .select(Projections.constructor(
+            EmployeeGroupCountRow.class,
+            keyExpr,
+            countExpr))
+        .from(e)
+        .where(where)
+        .groupBy(keyExpr)
+        .orderBy(countExpr.desc())
+        .fetch();
+  }
+
+  @Override
+  public Long countTotalByStatus(EmployeeStatus status) {
+    BooleanBuilder where = new BooleanBuilder();
+    if (status != null) {
+      where.and(e.status.eq(status));
+    }
+
+    return queryFactory
+        .select(e.id.count())
+        .from(e)
+        .where(where)
+        .fetchOne();
+  }
+
+  @Override
+  public Long searchCountByDateBetween(EmployeeStatus status, LocalDate from, LocalDate to) {
+    BooleanBuilder where = new BooleanBuilder()
+        .and(e.hireDate.between(from, to));
+    if (status != null) {
+      where.and(e.status.eq(status));
+    }
+
+    return queryFactory
+        .select(e.id.count().coalesce(0L))
+        .from(e)
+        .where(where)
+        .fetchOne();
+  }
+
 
   private OrderSpecifier<?> buildPrimaryOrder(String sortField, boolean asc) {
     return switch (sortField) {

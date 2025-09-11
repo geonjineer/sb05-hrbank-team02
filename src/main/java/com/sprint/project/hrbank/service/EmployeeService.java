@@ -5,6 +5,7 @@ import com.sprint.project.hrbank.dto.employee.EmployeeCreateRequest;
 import com.sprint.project.hrbank.dto.employee.EmployeeDto;
 import com.sprint.project.hrbank.dto.employee.EmployeeSearchRequest;
 import com.sprint.project.hrbank.dto.employee.EmployeeUpdateRequest;
+import com.sprint.project.hrbank.dto.file.FileResponse;
 import com.sprint.project.hrbank.entity.Department;
 import com.sprint.project.hrbank.entity.Employee;
 import com.sprint.project.hrbank.entity.File;
@@ -38,15 +39,26 @@ public class EmployeeService {
   private static final Set<String> ALLOWED_SORT = Set.of("name", "employeeNumber", "hireDate");
 
   @Transactional
-  public EmployeeDto create(EmployeeCreateRequest request) {
+  public EmployeeDto create(EmployeeCreateRequest request, FileResponse profileResponse) {
     String name = request.name();
     String email = request.email();
     String position = request.position();
+
+    validateUniqueName(name);
+    validateUniqueEmail(email);
+
+    File profileImage = profileResponse == null
+        ? null
+        : fileRepository.findById(profileResponse.id())
+            .orElseThrow(() -> new NoSuchElementException(
+                "Profile image not found: " + profileResponse.id()));
+
     Department department = departmentRepository.findById(request.departmentId())
-        .orElseThrow(() -> new NoSuchElementException("Department not found"));
+        .orElseThrow(
+            () -> new NoSuchElementException("Department not found: " + request.departmentId()));
     LocalDate hireDate = request.hireDate();
 
-    Employee employee = new Employee(name, email, hireDate, position, department, null);
+    Employee employee = new Employee(name, email, hireDate, position, department, profileImage);
 
     employeeRepository.save(employee);
     return employeeMapper.toDto(employee);
@@ -62,7 +74,7 @@ public class EmployeeService {
   @Transactional(readOnly = true)
   public CursorPageResponse<EmployeeDto> find(EmployeeSearchRequest request) {
     int raw = (request.size() == null || request.size() <= 0) ? 10 : request.size();
-    int size = Math.max(raw, 100); // 한 페이지에 담을 수 있는 최댓값을 100으로
+    int size = Math.min(raw, 100); // 한 페이지에 담을 수 있는 최댓값을 100으로
 
     if (request.hireDateFrom() != null && request.hireDateTo() != null
         && request.hireDateFrom().isAfter(request.hireDateTo())) {
@@ -163,12 +175,23 @@ public class EmployeeService {
   public void delete(Long employeeId) { // 삭제할 직원 id 확인
     boolean exists = employeeRepository.existsById(employeeId);
     if (!exists) { // 삭제할 id 존재하지 않을 경우
-      throw new NoSuchElementException("Employee not found with id: " + employeeId); // 예외 처리 -> 에러 메세지 발생
+      throw new NoSuchElementException(
+          "Employee not found with id: " + employeeId); // 예외 처리 -> 에러 메세지 발생
     }
-
 
     employeeRepository.deleteById(employeeId); // 직원 아이디 삭제
 
   }
 
+  private void validateUniqueName(String name) {
+    if (employeeRepository.existsByName(name)) {
+      throw new IllegalArgumentException("Employee already exists with name: " + name);
+    }
+  }
+
+  private void validateUniqueEmail(String email) {
+    if (employeeRepository.existsByEmail(email)) {
+      throw new IllegalArgumentException("Employee already exists with email: " + email);
+    }
+  }
 }

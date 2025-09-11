@@ -10,12 +10,12 @@ public record EmployeeDto(
     String name,
     String email,
     String employeeNumber,
-    long departmentId,
+    String departmentId,
     String departmentName,
     String position,
     LocalDate hireDate,
     EmployeeStatus status,
-    long profileImageId
+    Long profileImageId
 ) {
 
 }

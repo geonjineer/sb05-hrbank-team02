@@ -15,7 +15,6 @@ import com.sprint.project.hrbank.repository.EmployeeRepository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
-
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -30,7 +29,6 @@ public class DepartmentService {
   private final DepartmentRepository departmentRepository;
   private final EmployeeRepository employeeRepository;
   private final DepartmentMapper departmentMapper;
-
   private final CursorCodec cursorCodec;
   private final CursorPageAssembler cursorPageAssembler;
   private static final Set<String> ALLOWED_SORT = Set.of("name", "establishedDate");
@@ -53,7 +51,7 @@ public class DepartmentService {
 
   @Transactional(readOnly = true)
   public DepartmentDto find(Long id) {
-     return departmentRepository.findById(id)
+    return departmentRepository.findById(id)
         .map(department -> {
           Long employeeCount = employeeRepository.countByDepartment(department);
           return departmentMapper.toDepartmentDto(department, employeeCount);
@@ -122,13 +120,15 @@ public class DepartmentService {
     );
 
   }
-
+  
   @Transactional
   public DepartmentDto update(Long id, DepartmentUpdateRequest request) {
     Department department = departmentRepository.findById(id)
-            .orElseThrow(() -> new NoSuchElementException("Department not found with id: " + id));
-    if (!department.getName().equals(request.name()) && departmentRepository.existsByName(request.name())) {
-      throw new IllegalArgumentException("Department with name " + request.name() + " already exists.");
+        .orElseThrow(() -> new NoSuchElementException("Department not found with id: " + id));
+    if (!department.getName().equals(request.name()) && departmentRepository.existsByName(
+        request.name())) {
+      throw new IllegalArgumentException(
+          "Department with name " + request.name() + " already exists.");
     }
 
     department.setName(request.name());
@@ -147,7 +147,7 @@ public class DepartmentService {
 
     if (employeeRepository.existsByDepartment(department)) {
       throw new IllegalArgumentException("Deletion failed: Employees are still assigned to\n" +
-              "  this department.");
+          "  this department.");
     }
 
     // 3. 부서 삭제

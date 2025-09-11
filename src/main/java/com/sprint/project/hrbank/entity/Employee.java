@@ -72,7 +72,7 @@ public class Employee {
   }
 
   public boolean update(String name, String email, LocalDate hireDate, String position,
-      Department department, File profileImage) {
+      Department department) {
     boolean changed = false;
 
     if (this.name != null && !name.equals(this.name)) {

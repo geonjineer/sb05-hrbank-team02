@@ -39,7 +39,8 @@ public class ChangeLogCreateRequestMapper {
         .build();
   }
 
-  public ChangeLogCreateRequest forUpdate(EmployeeDto before, EmployeeDto after, String memo, String ip) {
+  public ChangeLogCreateRequest forUpdate(EmployeeDto before, EmployeeDto after, String memo,
+      String ip) {
     List<ChangeLogDiffCreate> diffs = new ArrayList<>();
     addIfChanged(diffs, "name", before.name(), after.name());
     addIfChanged(diffs, "email", normalizeEmail(before.email()), normalizeEmail(after.email()));
@@ -67,14 +68,23 @@ public class ChangeLogCreateRequestMapper {
         .employeeNumber(before.employeeNumber())
         .memo(null)
         .ipAddress(ip)
-        .diffs(List.of()) // 보통 삭제는 상세 diff 생략
+        .diffs(List.of(
+            diff("name", before.name(), null),
+            diff("email", before.email(), null),
+            diff("departmentId", before.departmentId(), null),
+            diff("position", before.position(), null),
+            diff("hireDate", before.hireDate(), null),
+            diff("status", before.status(), null),
+            diff("profileImageId", before.profileImageId(), null)
+        )) // 보통 삭제는 상세 diff 생략
         .at(Instant.now())
         .build();
   }
 
   // helper
 
-  private void addIfChanged(List<ChangeLogDiffCreate> diffs, String property, Object before, Object after) {
+  private void addIfChanged(List<ChangeLogDiffCreate> diffs, String property, Object before,
+      Object after) {
     if (!same(before, after)) {
       diffs.add(diff(property, before, after));
     }

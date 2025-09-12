@@ -1,11 +1,9 @@
 package com.sprint.project.hrbank.dto.changeLog;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import lombok.Builder;
 
-@Builder
-public record DiffDto(
-    String propertyName,
+public record ChangeLogDiffCreate(
+    String property,
     JsonNode before,
     JsonNode after
 ) {

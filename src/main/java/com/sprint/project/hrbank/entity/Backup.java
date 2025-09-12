@@ -20,7 +20,7 @@ public class Backup {
 
   // ✅ 반드시 NULL 허용 (SKIPPED 시 파일 없음)
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "file_id", nullable = true)
+  @JoinColumn(name = "file_id")
   private File file; // {백업 파일} (성공: csv, 실패: log, 스킵: null)
 
   @Column(length = 50, nullable = false)

@@ -7,9 +7,7 @@ import com.sprint.project.hrbank.entity.BackupStatus;
 import com.sprint.project.hrbank.service.BackupReadService;
 import com.sprint.project.hrbank.service.BackupService;
 import jakarta.servlet.http.HttpServletRequest;
-import java.time.OffsetDateTime;
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,23 +42,8 @@ public class BackupController {
   // GET /api/backups : 목록(커서 페이징)
   @GetMapping
   public ResponseEntity<CursorPageResponse<BackupItemDto>> list(
-      @RequestParam(required = false) String worker,
-      @RequestParam(required = false) BackupStatus status,
-      @RequestParam(required = false, name = "startedAtFrom")
-      @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime startedAtFrom,
-      @RequestParam(required = false, name = "startedAtTo")
-      @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime startedAtTo,
-      @RequestParam(required = false) Long idAfter,
-      @RequestParam(required = false) String cursor,
-      @RequestParam(defaultValue = "10") Integer size,
-      @RequestParam(defaultValue = "startedAt") String sortField,
-      @RequestParam(defaultValue = "DESC") String sortDirection
+      @ModelAttribute BackupSearchRequest req
   ) {
-    // 파라미터를 DTO로 묶어서 서비스로 전달
-    BackupSearchRequest req = new BackupSearchRequest(
-        worker, status, startedAtFrom, startedAtTo,
-        idAfter, cursor, size, sortField, sortDirection
-    );
     return ResponseEntity.ok(backupReadService.search(req));
   }
 

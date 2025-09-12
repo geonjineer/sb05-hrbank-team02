@@ -14,17 +14,13 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "change_logs")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 @Getter
-@Builder
 public class ChangeLog {
 
   @Id
@@ -47,8 +43,20 @@ public class ChangeLog {
   @Column(nullable = false)
   private Instant at;
 
-  @OneToMany(mappedBy = "changLog", cascade = CascadeType.ALL, orphanRemoval = true)
-  @Builder.Default
-  private List<ChangeLogDiff> diffs = new ArrayList<>();
+  @OneToMany(mappedBy = "changeLog", cascade = CascadeType.ALL, orphanRemoval = true)
+  private final List<ChangeLogDiff> diffs = new ArrayList<>();
 
+  public void addDiff(ChangeLogDiff diff) {
+    diffs.add(diff);
+    diff.setChangeLog(this);
+  }
+
+  public ChangeLog(ChangeLogType type, String employeeNumber, String memo, String ipAddress,
+      Instant at) {
+    this.type = type;
+    this.employeeNumber = employeeNumber;
+    this.memo = memo;
+    this.ipAddress = ipAddress;
+    this.at = at;
+  }
 }

@@ -13,5 +13,7 @@ public interface ChangeLogRepository extends JpaRepository<ChangeLog, Long>,
   Long countChangeAfter(OffsetDateTime base);
   boolean existsByAtAfter(@NonNull Instant time);
 
+  Long countChangeLogByAtBetween(Instant atBefore, Instant atAfter);
+
 }
 

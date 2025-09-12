@@ -85,3 +85,6 @@ ALTER TABLE employees
 -- 깔끔한 라이프사이클을 위한 시퀀스 소유권 설정
 ALTER SEQUENCE employees_employee_number_seq
     OWNED BY employees.employee_number;
+
+-- file_id NULL 허용으로 수정
+ALTER TABLE backups ALTER COLUMN file_id DROP NOT NULL;

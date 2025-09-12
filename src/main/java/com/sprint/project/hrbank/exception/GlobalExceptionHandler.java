@@ -113,19 +113,6 @@ public class GlobalExceptionHandler {
             .build());
   }
 
-  @ExceptionHandler(Exception.class)
-  public ResponseEntity<ErrorResponse> handleServerError(Exception e) {
-    log.error("Internal Server Error: {}", e.getMessage(), e);
-
-    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-        ErrorResponse.builder()
-            .timestamp(Instant.now())
-            .message("Internal Server Error")
-            .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-            .details(safeDetail(e))
-            .build());
-  }
-
   //FileStorageException 처리 추가
   @ExceptionHandler(FileStorageException.class)
   public ResponseEntity<ErrorResponse> handleFileStorageException(Exception e) {

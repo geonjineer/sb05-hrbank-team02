@@ -12,13 +12,20 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-import java.time.OffsetDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "backups")
 @Getter
+@Setter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 public class Backup {
 
@@ -26,49 +33,42 @@ public class Backup {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private long id;
 
-  //FK files.id
+  // ✅ 반드시 NULL 허용
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "file_id", nullable = false)
-  private File fIle;
+  @JoinColumn(name = "file_id", nullable = true) // 또는 생략(default nullable)
+  private File file; // {백업 파일} (성공: csv, 실패: log)
 
   @Column(length = 50, nullable = false)
-  private String worker;
+  private String worker; // {작업자}: 요청자 IP or "system"
 
   @Column(name = "started_at", nullable = false)
-  private OffsetDateTime startedAt;
+  private OffsetDateTime startedAt; // {시작 시간}
 
   @Column(name = "ended_at", nullable = false)
-  private OffsetDateTime endedAt;
+  private OffsetDateTime endedAt;   // {종료 시간} - DDL NOT NULL
 
   @Enumerated(EnumType.STRING)
   @Column(length = 20, nullable = false)
-  private BackupStatus status;
+  private BackupStatus status; // {상태}: IN_PROGRESS, COMPLETED, SKIPPED, FAILED
 
-
-  //생성자(endedAt DDL이 NOT NULL이라 초기값을 startedAt으로 셋팅)
-  public Backup(File fIle, String worker, OffsetDateTime startedAt, OffsetDateTime endedAt, BackupStatus status) {
-    this.fIle = fIle;
-    this.worker = worker;
-    this.startedAt = startedAt;
-    this.endedAt = startedAt;
-    this.status = status;
+  // 도메인 메서드
+  public void markInProgress() {
+    this.status = BackupStatus.IN_PROGRESS;
+    // DDL 때문에 시작 시 endedAt = startedAt 로 일단 세팅
+    this.endedAt = this.startedAt;
   }
-
-  public void complete(File fIle, OffsetDateTime endedAt) {
+  public void complete(File file, OffsetDateTime endedAt) {
+    this.file = file;
     this.endedAt = endedAt;
     this.status = BackupStatus.COMPLETED;
-    this.fIle = fIle;
   }
-
-  public void fail(File logFIle, OffsetDateTime endedAt) {
+  public void fail(File errorFile, OffsetDateTime endedAt) {
+    this.file = errorFile;
     this.endedAt = endedAt;
     this.status = BackupStatus.FAILED;
-    this.fIle = logFIle;
   }
-
   public void skip(OffsetDateTime endedAt) {
     this.endedAt = endedAt;
     this.status = BackupStatus.SKIPPED;
   }
-
 }

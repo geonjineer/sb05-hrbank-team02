@@ -10,21 +10,21 @@ import com.sprint.project.hrbank.repository.BackupRepository;
 import com.sprint.project.hrbank.repository.ChangeLogRepository;
 import com.sprint.project.hrbank.repository.EmployeeRepository;
 import jakarta.persistence.EntityManager;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -46,15 +46,14 @@ public class BackupService {
   public void runBackup(String operator) {
     // ===== 공통 시간/포맷 준비 =====
     ZoneId zone = ZoneId.of(props.getBackup().getTimezone());
-    OffsetDateTime now = OffsetDateTime.now(zone);
+    Instant now = Instant.now();
     DateTimeFormatter TS = DateTimeFormatter.ofPattern("yyyyMMddHHmmss").withZone(zone);
 
     // ===== STEP.1 필요 여부 판단 =====
-    OffsetDateTime baseEndedAt = backupRepository
+    Instant base = backupRepository
         .findTopByStatusOrderByEndedAtDesc(BackupStatus.COMPLETED)
         .map(Backup::getEndedAt)
-        .orElse(OffsetDateTime.MIN);
-    Instant base = baseEndedAt.toInstant();
+        .orElse(Instant.EPOCH); // 과거 매우 오래전(1970-01-01T00:00:00Z)
 
     boolean needBackup = changeLogRepository.existsByAtAfter(base);
     if (!needBackup) {
@@ -62,11 +61,13 @@ public class BackupService {
       Backup skipped = Backup.builder()
           .worker(operator)
           .startedAt(now)
-          .endedAt(now)
+          .endedAt(now) // DDL: NOT NULL
           .status(BackupStatus.SKIPPED)
           .build();
-      skipped.skip(now); // 도메인 메서드 호출 (의미 명확화)
+      // 도메인 메서드 호출(명시적 전이)
+      skipped.skip(now);
       backupRepository.save(skipped);
+
       log.info("Backup skipped: no changes since {}", base);
       return;
     }
@@ -85,22 +86,21 @@ public class BackupService {
       tempCsv = Files.createTempFile("hrbank-employees-", ".csv");
       writeEmployeesCsv(tempCsv);
 
-      // 파일명: employees-YYYYMMddHHmmss.csv
-      String fileName = "employees-" + TS.format(now.toInstant()) + ".csv";
+      // 파일명: employees-YYYYMMddHHmmss.csv (표시는 타임존, 저장값은 Instant)
+      String fileName = "employees-" + TS.format(now) + ".csv";
 
       // CSV를 로컬 스토리지로 이동 + 메타 등록
       FileResponse saved = fileService.saveLocal(tempCsv, fileName, "text/csv");
 
       // ===== STEP.4-1 성공 처리 =====
       File fileRef = entityManager.getReference(File.class, saved.id());
-      backup.complete(fileRef, OffsetDateTime.now(zone));
+      backup.complete(fileRef, Instant.now());
       backupRepository.save(backup);
       log.info("Backup completed: fileId={}, name={}", saved.id(), fileName);
 
     } catch (Exception e) {
       log.error("Backup failed", e);
-
-      // 임시 CSV 삭제 시도
+      // 실패 시 임시 파일 삭제 시도
       try { if (tempCsv != null) Files.deleteIfExists(tempCsv); } catch (IOException ignore) {}
 
       // 에러 로그 저장 (STEP.4-2)
@@ -108,16 +108,16 @@ public class BackupService {
         Path tempLog = Files.createTempFile("hrbank-backup-error-", ".log");
         Files.writeString(tempLog, "Backup failed: " + e.getMessage());
 
-        String logName = "backup-error-" + TS.format(OffsetDateTime.now().toInstant()) + ".log";
+        String logName = "backup-error-" + TS.format(Instant.now()) + ".log";
         FileResponse err = fileService.saveLocal(tempLog, logName, "text/plain");
 
         File logRef = entityManager.getReference(File.class, err.id());
-        backup.fail(logRef, OffsetDateTime.now(zone));
+        backup.fail(logRef, Instant.now());
         backupRepository.save(backup);
 
       } catch (Exception logSaveEx) {
-        // 에러 로그 저장 실패 → 최소 FAILED + 종료시각은 기록
-        backup.fail(null, OffsetDateTime.now(zone));
+        // 에러 로그 저장도 실패 → 최소한 FAILED + 종료시각은 기록
+        backup.fail(null, Instant.now());
         backupRepository.save(backup);
       }
     }
@@ -155,14 +155,8 @@ public class BackupService {
     }
   }
 
-  private String safe(Object o) {
-    return (o == null) ? "" : String.valueOf(o);
-  }
+  private String safe(Object o) { return o == null ? "" : String.valueOf(o); }
 
-  /**
-   * CSV 특수문자 이스케이프:
-   * 콤마/따옴표/개행 포함 시 "..." 로 감싸고 내부 따옴표는 "" 로 이스케이프
-   */
   private String csvEscape(String s) {
     if (s == null) return "";
     boolean needQuote = s.contains(",") || s.contains("\"") || s.contains("\n") || s.contains("\r");

@@ -82,6 +82,7 @@ logging:
     org.springframework.web: trace
     org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
 
+
 #file storage
 hrbank:
   storage:

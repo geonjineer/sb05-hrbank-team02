@@ -101,7 +101,7 @@ public class FileService {
   }
 
   // 서버에서 생성한 임시 파일을 파일 관리 규칙에 맞게 저장한다.
-  // 1. size 체크 -> File meta sava
+  // 1. size 체크 -> File meta save
   // 2. storage/{id} 위치로 이동
   @Transactional
   public FileResponse saveLocal(Path tempFile, String fileName, String contentType) {
@@ -121,5 +121,19 @@ public class FileService {
     } catch (IOException e) {
       throw new FileStorageException("로컬 파일 저장 실패: " + tempFile, e);
     }
+  }
+
+  // 실패 롤백/정리용: 메타 + 디스크 파일 동시 삭제
+  @Transactional
+  public void delete(Long id) {
+    File meta = fileRepository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("파일 메타 정보를 찾을 수 없습니다. id: " + id));
+    Path p = Path.of(storageRoot, String.valueOf(id));
+    try {
+      Files.deleteIfExists(p);
+    } catch (IOException e) {
+      throw new FileStorageException("디스크 파일 삭제 실패: " + p, e);
+    }
+    fileRepository.delete(meta);
   }
 }

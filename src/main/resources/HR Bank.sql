@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS "files"
 CREATE TABLE IF NOT EXISTS "backups"
 (
     "id"         BIGSERIAL PRIMARY KEY,
-    "file_id"    BIGINT      NOT NULL,
+    "file_id"    BIGINT      NULL,
     "worker"     VARCHAR(50) NOT NULL,
     "started_at" timestamptz NOT NULL,
     "ended_at"   timestamptz NOT NULL,
@@ -85,6 +85,3 @@ ALTER TABLE employees
 -- 깔끔한 라이프사이클을 위한 시퀀스 소유권 설정
 ALTER SEQUENCE employees_employee_number_seq
     OWNED BY employees.employee_number;
-
--- file_id NULL 허용으로 수정
-ALTER TABLE backups ALTER COLUMN file_id DROP NOT NULL;

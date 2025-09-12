@@ -60,7 +60,7 @@ hrbank:
 
   backup:
     cron: "0 0 * * * *"      # 매 시 정각
-    timezone: "Asia/Seoul"   # 한국 시간 기준
+    timezone: "UTC"   # 글로벌 서비스
 
 # [추가] 업로드 제한 무시(-1) → 대용량 파일 업로드 시 Tomcat이 요청 버퍼를 삼키지 않고 그대로 전달
 server:

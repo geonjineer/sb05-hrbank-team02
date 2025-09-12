@@ -44,7 +44,7 @@ public class ChangeLog {
   private Instant at;
 
   @OneToMany(mappedBy = "changLog", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<ChangeLogDiff> diffs = new ArrayList<>();
+  private final List<ChangeLogDiff> diffs = new ArrayList<>();
 
   public void addDiff(ChangeLogDiff diff) {
     diffs.add(diff);

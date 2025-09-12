@@ -1,24 +1,9 @@
 package com.sprint.project.hrbank.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import lombok.*;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-import java.time.OffsetDateTime;
+import java.time.Instant;
 
 @Entity
 @Table(name = "backups")
@@ -33,41 +18,47 @@ public class Backup {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private long id;
 
-  // ✅ 반드시 NULL 허용
+  // ✅ 반드시 NULL 허용 (SKIPPED 시 파일 없음)
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "file_id", nullable = true) // 또는 생략(default nullable)
-  private File file; // {백업 파일} (성공: csv, 실패: log)
+  @JoinColumn(name = "file_id", nullable = true)
+  private File file; // {백업 파일} (성공: csv, 실패: log, 스킵: null)
 
   @Column(length = 50, nullable = false)
   private String worker; // {작업자}: 요청자 IP or "system"
 
   @Column(name = "started_at", nullable = false)
-  private OffsetDateTime startedAt; // {시작 시간}
+  private Instant startedAt; // {시작 시간}
 
   @Column(name = "ended_at", nullable = false)
-  private OffsetDateTime endedAt;   // {종료 시간} - DDL NOT NULL
+  private Instant endedAt;   // {종료 시간} - DDL NOT NULL
 
   @Enumerated(EnumType.STRING)
   @Column(length = 20, nullable = false)
   private BackupStatus status; // {상태}: IN_PROGRESS, COMPLETED, SKIPPED, FAILED
 
-  // 도메인 메서드
+  // ========================
+  // ✅ 도메인 메서드
+  // ========================
+
   public void markInProgress() {
     this.status = BackupStatus.IN_PROGRESS;
-    // DDL 때문에 시작 시 endedAt = startedAt 로 일단 세팅
-    this.endedAt = this.startedAt;
+    this.endedAt = this.startedAt; // 시작 = 종료 시간 동기화
   }
-  public void complete(File file, OffsetDateTime endedAt) {
+
+  public void complete(File file, Instant endedAt) {
     this.file = file;
     this.endedAt = endedAt;
     this.status = BackupStatus.COMPLETED;
   }
-  public void fail(File errorFile, OffsetDateTime endedAt) {
+
+  public void fail(File errorFile, Instant endedAt) {
     this.file = errorFile;
     this.endedAt = endedAt;
     this.status = BackupStatus.FAILED;
   }
-  public void skip(OffsetDateTime endedAt) {
+
+  public void skip(Instant endedAt) {
+    this.file = null; // 스킵 시 파일 없음
     this.endedAt = endedAt;
     this.status = BackupStatus.SKIPPED;
   }

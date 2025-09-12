@@ -10,6 +10,20 @@ spring:
     username: hrbank_user
     password: hrbank1234
     driver-class-name: org.postgresql.Driver
+  jackson:
+    time-zone: UTC
+    serialization:
+      write-dates-as-timestamps: false
+app:
+  error:
+    constraint-map:
+      uk_employees_email: EMPLOYEE_EMAIL_DUPLICATE
+      uk_employees_name:  EMPLOYEE_NAME_DUPLICATE
+    sqlstate-map:
+      '23505': DUPLICATE_KEY     # unique_violation
+      '23503': FK_VIOLATION      # foreign_key_violation
+      '23514': CHECK_VIOLATION   # check_violation
+    default-code: INTERNAL_ERROR
 
   # JPA
   jpa:
@@ -26,6 +40,12 @@ spring:
         physical_naming_strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
         jdbc.time_zone: UTC
     open-in-view: false
+
+  # ErrorMessage
+  messages:
+    basename: messages
+    encoding: UTF-8
+    fallback-to-system-locale: false
 
 springdoc:
   api-docs:

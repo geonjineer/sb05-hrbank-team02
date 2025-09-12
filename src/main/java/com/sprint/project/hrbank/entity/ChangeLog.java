@@ -43,7 +43,7 @@ public class ChangeLog {
   @Column(nullable = false)
   private Instant at;
 
-  @OneToMany(mappedBy = "changLog", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(mappedBy = "changeLog", cascade = CascadeType.ALL, orphanRemoval = true)
   private final List<ChangeLogDiff> diffs = new ArrayList<>();
 
   public void addDiff(ChangeLogDiff diff) {

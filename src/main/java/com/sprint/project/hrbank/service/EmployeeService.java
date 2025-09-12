@@ -10,6 +10,8 @@ import com.sprint.project.hrbank.dto.file.FileResponse;
 import com.sprint.project.hrbank.entity.Department;
 import com.sprint.project.hrbank.entity.Employee;
 import com.sprint.project.hrbank.entity.File;
+import com.sprint.project.hrbank.exception.BusinessException;
+import com.sprint.project.hrbank.exception.ErrorCode;
 import com.sprint.project.hrbank.mapper.ChangeLogCreateRequestMapper;
 import com.sprint.project.hrbank.mapper.CursorCodec;
 import com.sprint.project.hrbank.mapper.CursorCodec.CursorPayload;
@@ -24,11 +26,13 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EmployeeService {
 
   private final EmployeeRepository employeeRepository;
@@ -214,18 +218,25 @@ public class EmployeeService {
 
   private void validateUniqueName(String name) {
     if (employeeRepository.existsByName(name)) {
-      throw new IllegalArgumentException("Employee already exists with name: " + name);
+
+      log.warn("Duplicate employee name: {}", name);
+      throw new BusinessException(ErrorCode.EMPLOYEE_NAME_DUPLICATE, "name");
     }
   }
 
   private void validateUniqueEmail(String email) {
     if (employeeRepository.existsByEmail(email)) {
-      throw new IllegalArgumentException("Employee already exists with email: " + email);
+
+      log.warn("Duplicate employee email: {}", email);
+      throw new BusinessException(ErrorCode.EMPLOYEE_EMAIL_DUPLICATE, "email");
     }
   }
 
   private Employee validateId(Long employeeId) {
     return employeeRepository.findById(employeeId)
-        .orElseThrow(() -> new NoSuchElementException("Employee not found with id: " + employeeId));
+        .orElseThrow(() -> {
+          log.warn("Employee not found with id: {}", employeeId);
+          return new BusinessException(ErrorCode.EMPLOYEE_NOT_FOUND, "id");
+        });
   }
 }

@@ -10,6 +10,10 @@ spring:
     username: hrbank_user
     password: hrbank1234
     driver-class-name: org.postgresql.Driver
+  jackson:
+    time-zone: UTC
+    serialization:
+      write-dates-as-timestamps: false
 
   # JPA
   jpa:
@@ -27,6 +31,12 @@ spring:
         jdbc.time_zone: UTC
     open-in-view: false
 
+  # ErrorMessage
+  messages:
+    basename: messages
+    encoding: UTF-8
+    fallback-to-system-locale: false
+
 springdoc:
   api-docs:
     enabled: true          # API 스펙 JSON 활성화
@@ -36,6 +46,25 @@ springdoc:
     path: /swagger-ui.html # Swagger UI 접속 경로
     display-request-duration: true   # 요청 소요 시간 표시
     persist-authorization: true      # 새로고침해도 토큰 유지
+
+app:
+  error:
+    constraint-map:
+      uk_employees_email: EMPLOYEE_EMAIL_DUPLICATE
+      uk_employees_name:  EMPLOYEE_NAME_DUPLICATE
+    sqlstate-map:
+      '23505': DUPLICATE_KEY     # unique_violation
+      '23503': FK_VIOLATION      # foreign_key_violation
+      '23514': CHECK_VIOLATION   # check_violation
+    default-code: INTERNAL_ERROR
+
+server:
+  forward-headers-strategy: framework
+  tomcat:
+    remoteip:
+      remote-ip-header: x-forwarded-for
+      protocol-header: x-forwarded-proto
+      internal-proxies: 10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|127\.0\.0\.1
 
 # log
 logging:
@@ -48,11 +77,3 @@ logging:
     # Spring Web
     org.springframework.web: trace
     org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
-
-server:
-  forward-headers-strategy: framework
-  tomcat:
-    remoteip:
-      remote-ip-header: x-forwarded-for
-      protocol-header: x-forwarded-proto
-      internal-proxies: 10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|127\.0\.0\.1

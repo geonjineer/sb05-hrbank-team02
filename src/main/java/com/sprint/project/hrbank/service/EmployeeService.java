@@ -10,6 +10,8 @@ import com.sprint.project.hrbank.dto.file.FileResponse;
 import com.sprint.project.hrbank.entity.Department;
 import com.sprint.project.hrbank.entity.Employee;
 import com.sprint.project.hrbank.entity.File;
+import com.sprint.project.hrbank.exception.BusinessException;
+import com.sprint.project.hrbank.exception.ErrorCode;
 import com.sprint.project.hrbank.mapper.ChangeLogCreateRequestMapper;
 import com.sprint.project.hrbank.mapper.CursorCodec;
 import com.sprint.project.hrbank.mapper.CursorCodec.CursorPayload;
@@ -20,15 +22,16 @@ import com.sprint.project.hrbank.repository.EmployeeRepository;
 import com.sprint.project.hrbank.repository.FileRepository;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EmployeeService {
 
   private final EmployeeRepository employeeRepository;
@@ -53,13 +56,9 @@ public class EmployeeService {
 
     File profileImage = profileResponse == null
         ? null
-        : fileRepository.findById(profileResponse.id())
-            .orElseThrow(() -> new NoSuchElementException(
-                "Profile image not found: " + profileResponse.id()));
+        : validateFileId(profileResponse.id());
 
-    Department department = departmentRepository.findById(request.departmentId())
-        .orElseThrow(
-            () -> new NoSuchElementException("Department not found: " + request.departmentId()));
+    Department department = validateDepartmentId(request.departmentId());
     LocalDate hireDate = request.hireDate();
 
     Employee employee = new Employee(name, email, hireDate, position, department, profileImage);
@@ -87,10 +86,11 @@ public class EmployeeService {
   @Transactional(readOnly = true)
   public CursorPageResponse<EmployeeDto> find(EmployeeSearchRequest request) {
     int size = (request.size() == null || request.size() <= 0) ? 10 : request.size();
-    
+
     if (request.hireDateFrom() != null && request.hireDateTo() != null
         && request.hireDateFrom().isAfter(request.hireDateTo())) {
-      throw new IllegalArgumentException("hireDateFrom이 hireDateTo보다 이후일 수 없습니다.");
+      log.warn("Hire date from and hire date are not same");
+      throw new BusinessException(ErrorCode.DATE_RANGE_INVALID, "hireDateFrom", "hireDateTo");
     }
 
     // sortField: 정렬 기준으로 name, employeeNumber, hireDate 중 무엇을 쓸 건지 정하고
@@ -110,8 +110,7 @@ public class EmployeeService {
     } else if (request.idAfter() != null) {
       // idAfter는 id 기준으로만 진행 (정렬 상관없이 “그 다음” 의미)
       Long idAfter = request.idAfter();
-      Employee last = employeeRepository.findById(idAfter)
-          .orElseThrow(() -> new NoSuchElementException("Employee not found: " + idAfter));
+      Employee last = validateId(idAfter);
 
       lastSortVal = switch (sortField) {
         case "name" -> last.getName();
@@ -160,18 +159,14 @@ public class EmployeeService {
     Employee employee = validateId(employeeId);
 
     // 2. DTO에 담겨온 ID로 연관 엔티티(부서, 프로필 이미지) 조회
-    Department department = departmentRepository.findById(request.departmentId())
-        .orElseThrow(() -> new NoSuchElementException(
-            "Department not found with id: " + request.departmentId()));
+    Department department = validateDepartmentId(request.departmentId());
 
     validateUniqueName(request.name());
     validateUniqueEmail(request.email());
 
     File profileImage = profileResponse == null
         ? null
-        : fileRepository.findById(profileResponse.id())
-            .orElseThrow(() -> new NoSuchElementException(
-                "Profile image not found with id: " + profileResponse.id()));
+        : validateFileId(profileResponse.id());
 
     // 3. 엔티티 값을 DTO 값으로 변경 (더티 체킹 활용)
     employee.update(
@@ -214,18 +209,41 @@ public class EmployeeService {
 
   private void validateUniqueName(String name) {
     if (employeeRepository.existsByName(name)) {
-      throw new IllegalArgumentException("Employee already exists with name: " + name);
+
+      log.warn("Duplicate employee name: {}", name);
+      throw new BusinessException(ErrorCode.EMPLOYEE_NAME_DUPLICATE, "name");
     }
   }
 
   private void validateUniqueEmail(String email) {
     if (employeeRepository.existsByEmail(email)) {
-      throw new IllegalArgumentException("Employee already exists with email: " + email);
+
+      log.warn("Duplicate employee email: {}", email);
+      throw new BusinessException(ErrorCode.EMPLOYEE_EMAIL_DUPLICATE, "email");
     }
   }
 
   private Employee validateId(Long employeeId) {
     return employeeRepository.findById(employeeId)
-        .orElseThrow(() -> new NoSuchElementException("Employee not found with id: " + employeeId));
+        .orElseThrow(() -> {
+          log.warn("Employee not found with id: {}", employeeId);
+          return new BusinessException(ErrorCode.EMPLOYEE_NOT_FOUND, "employeeId");
+        });
+  }
+
+  private Department validateDepartmentId(Long departmentId) {
+    return departmentRepository.findById(departmentId)
+        .orElseThrow(() -> {
+          log.warn("Department not found with id: {}", departmentId);
+          return new BusinessException(ErrorCode.DEPARTMENT_NOT_FOUND, "departmentId");
+        });
+  }
+
+  private File validateFileId(Long profileImageId) {
+    return fileRepository.findById(profileImageId)
+        .orElseThrow(() -> {
+          log.warn("Profile image not found with id: {}", profileImageId);
+          return new BusinessException(ErrorCode.PROFILE_IMAGE_NOT_FOUND, "profileImageId");
+        });
   }
 }

@@ -7,11 +7,12 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.sprint.project.hrbank.dto.backup.BackupSearchRequest;
 import com.sprint.project.hrbank.entity.Backup;
-import com.sprint.project.hrbank.entity.BackupStatus;
 import com.sprint.project.hrbank.repository.BackupQueryRepository;
-import jakarta.annotation.Nullable;
-import java.time.OffsetDateTime;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -24,17 +25,19 @@ public class BackupQueryRepositoryImpl implements BackupQueryRepository {
 
   @Override
   public List<Backup> search(
-      String worker,
-      BackupStatus status,
-      OffsetDateTime startedAtFrom,
-      OffsetDateTime startedAtTo,
+      BackupSearchRequest request,
       int sizePlusOne,
-      String sortField,
       boolean asc,
+      String sortField,
       String lastSortVal,
       Long lastId
   ) {
     BooleanBuilder where = new BooleanBuilder();
+
+    String worker = request.worker();
+    var status = request.status();
+    var startedAtFrom = request.startedAtFrom();
+    var startedAtTo = request.startedAtTo();
 
     if (hasText(worker)) {
       where.and(backup.worker.containsIgnoreCase(worker));
@@ -42,14 +45,18 @@ public class BackupQueryRepositoryImpl implements BackupQueryRepository {
     if (status != null) {
       where.and(backup.status.eq(status));
     }
+
+    // --- 기간 필터: booleanTemplate로 우회 ---
     if (startedAtFrom != null) {
-      where.and(backup.startedAt.goe(startedAtFrom));
+      Instant from = toInstantUtc(startedAtFrom);
+      where.and(Expressions.booleanTemplate("{0} >= {1}", backup.startedAt, from));
     }
     if (startedAtTo != null) {
-      where.and(backup.startedAt.loe(startedAtTo));
+      Instant to = toInstantUtc(startedAtTo);
+      where.and(Expressions.booleanTemplate("{0} <= {1}", backup.startedAt, to));
     }
 
-    // 커서(정렬키 + id)
+    // --- 커서 프레디케이트 ---
     if (lastId != null || hasText(lastSortVal)) {
       where.and(buildCursorPredicate(sortField, asc, lastSortVal, lastId));
     }
@@ -73,54 +80,69 @@ public class BackupQueryRepositoryImpl implements BackupQueryRepository {
     };
   }
 
-  /**
-   * DESC: (key < last) or (key == last and id < lastId)
-   * ASC : (key > last) or (key == last and id > lastId)
-   */
   private BooleanExpression buildCursorPredicate(
-      String sortField, boolean asc,
-      @Nullable String lastSortVal,
-      @Nullable Long lastId
+      String sortField, boolean asc, String lastSortVal, Long lastId
   ) {
+    // 타이브레이커: id 비교
     BooleanExpression idCmp = (lastId == null)
-        ? Expressions.FALSE.isTrue()   // id 미지정 시 tie-breaker 비활성
-        : (asc ? backup.id.gt(lastId) : backup.id.lt(lastId));
+        ? Expressions.FALSE.isTrue()
+        : (asc
+            ? Expressions.booleanTemplate("{0} > {1}", backup.id, lastId)
+            : Expressions.booleanTemplate("{0} < {1}", backup.id, lastId)
+        );
 
+    // primary key 비교 + tie-breaker(id)
     return switch (sortField) {
       case "endedAt" -> {
-        OffsetDateTime base = parseOffsetDateTimeOrLimit(lastSortVal, asc);
-        BooleanExpression keyCmp = asc ? backup.endedAt.gt(base) : backup.endedAt.lt(base);
-        BooleanExpression keyEq  = backup.endedAt.eq(base);
+        Instant base = parseInstantOrLimit(lastSortVal, asc);
+        BooleanExpression keyCmp = asc
+            ? Expressions.booleanTemplate("{0} > {1}", backup.endedAt, base)
+            : Expressions.booleanTemplate("{0} < {1}", backup.endedAt, base);
+        BooleanExpression keyEq  =
+            Expressions.booleanTemplate("{0} = {1}", backup.endedAt, base);
         yield keyCmp.or(keyEq.and(idCmp));
       }
       case "status" -> {
         String base = (lastSortVal == null) ? "" : lastSortVal;
+        // enum → string 비교 그대로 유지
         BooleanExpression keyCmp = asc
             ? backup.status.stringValue().gt(base)
             : backup.status.stringValue().lt(base);
         BooleanExpression keyEq  = backup.status.stringValue().eq(base);
         yield keyCmp.or(keyEq.and(idCmp));
       }
-      case "startedAt" -> {
-        OffsetDateTime base = parseOffsetDateTimeOrLimit(lastSortVal, asc);
-        BooleanExpression keyCmp = asc ? backup.startedAt.gt(base) : backup.startedAt.lt(base);
-        BooleanExpression keyEq  = backup.startedAt.eq(base);
+      default -> { // startedAt
+        Instant base = parseInstantOrLimit(lastSortVal, asc);
+        BooleanExpression keyCmp = asc
+            ? Expressions.booleanTemplate("{0} > {1}", backup.startedAt, base)
+            : Expressions.booleanTemplate("{0} < {1}", backup.startedAt, base);
+        BooleanExpression keyEq  =
+            Expressions.booleanTemplate("{0} = {1}", backup.startedAt, base);
         yield keyCmp.or(keyEq.and(idCmp));
       }
-      default -> Expressions.TRUE.isTrue(); // 알 수 없는 필드 → 필터 미적용
     };
   }
 
-  private OffsetDateTime parseOffsetDateTimeOrLimit(String s, boolean asc) {
+  // 문자열 → Instant 파싱 실패시 극값으로 보정
+  private Instant parseInstantOrLimit(String s, boolean asc) {
     try {
-      if (s == null || s.isBlank()) return asc ? OffsetDateTime.MIN : OffsetDateTime.MAX;
-      return OffsetDateTime.parse(s); // ISO-8601 기대
+      if (s == null || s.isBlank()) return asc ? Instant.MIN : Instant.MAX;
+      return Instant.parse(s);
     } catch (Exception ignore) {
-      return asc ? OffsetDateTime.MIN : OffsetDateTime.MAX;
+      return asc ? Instant.MIN : Instant.MAX;
     }
   }
 
-  private static boolean hasText(String s) {
-    return s != null && !s.isBlank();
+  // LocalDateTime/LocalDate/OffsetDateTime 등을 UTC Instant로 변환
+  private Instant toInstantUtc(Object temporal) {
+    if (temporal instanceof Instant i) return i;
+    if (temporal instanceof java.time.OffsetDateTime odt) return odt.toInstant();
+    if (temporal instanceof java.time.ZonedDateTime zdt) return zdt.toInstant();
+    if (temporal instanceof LocalDateTime ldt) return ldt.toInstant(ZoneOffset.UTC);
+    if (temporal instanceof java.time.LocalDate ld) return ld.atStartOfDay().toInstant(ZoneOffset.UTC);
+    // 그 외에는 그대로 now/혹은 예외 처리 – 여기선 안전하게 now로 보정
+    return Instant.now();
   }
+
+  private static boolean hasText(String s) { return s != null && !s.isBlank(); }
 }

@@ -1,13 +1,11 @@
 package com.sprint.project.hrbank.dto.backup;
 
-/**
- * 목록/단건 응답 DTO (엔티티 -> API 응답 전용)
- */
-public record BackupItemDto(
+/** 목록/단건 응답 DTO */
+public record BackupDto(
     Long id,
     String worker,
-    String startedAt,
-    String endedAt,
+    String startedAt, // ISO-8601 문자열
+    String endedAt,   // ISO-8601 문자열
     String status,
     Long fileId
 ) {}

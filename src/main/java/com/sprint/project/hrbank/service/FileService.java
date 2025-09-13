@@ -61,7 +61,8 @@ public class FileService {
   public FileResponse getMeta(Long id) {
     File meta = fileRepository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("파일 메타 정보를 찾을 수 없습니다. id: " + id));
-    return new FileResponse(meta.getId(), meta.getFileName(), meta.getContentType(), meta.getSize());
+    return new FileResponse(meta.getId(), meta.getFileName(), meta.getContentType(),
+        meta.getSize());
   }
 
   @Transactional(readOnly = true)
@@ -87,8 +88,10 @@ public class FileService {
         .toString();
     n = n.replaceAll("[\\\\/:*?\"<>|]", "_"); // Windows 금지 문자
     n = n.replaceAll("\\s+", " ");
-    if (n.equals(".") || n.equals("..")) n = "file";
-    if (n.length() > 255) n = n.substring(0, 255);
+    if (n.equals(".") || n.equals(".."))
+      n = "file";
+    if (n.length() > 255)
+      n = n.substring(0, 255);
     return n;
   }
 
@@ -121,19 +124,5 @@ public class FileService {
     } catch (IOException e) {
       throw new FileStorageException("로컬 파일 저장 실패: " + tempFile, e);
     }
-  }
-
-  // 실패 롤백/정리용: 메타 + 디스크 파일 동시 삭제
-  @Transactional
-  public void delete(Long id) {
-    File meta = fileRepository.findById(id)
-        .orElseThrow(() -> new NoSuchElementException("파일 메타 정보를 찾을 수 없습니다. id: " + id));
-    Path p = Path.of(storageRoot, String.valueOf(id));
-    try {
-      Files.deleteIfExists(p);
-    } catch (IOException e) {
-      throw new FileStorageException("디스크 파일 삭제 실패: " + p, e);
-    }
-    fileRepository.delete(meta);
   }
 }

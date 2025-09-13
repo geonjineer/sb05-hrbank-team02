@@ -61,7 +61,8 @@ public class FileService {
   public FileResponse getMeta(Long id) {
     File meta = fileRepository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("파일 메타 정보를 찾을 수 없습니다. id: " + id));
-    return new FileResponse(meta.getId(), meta.getFileName(), meta.getContentType(), meta.getSize());
+    return new FileResponse(meta.getId(), meta.getFileName(), meta.getContentType(),
+        meta.getSize());
   }
 
   @Transactional(readOnly = true)
@@ -87,8 +88,10 @@ public class FileService {
         .toString();
     n = n.replaceAll("[\\\\/:*?\"<>|]", "_"); // Windows 금지 문자
     n = n.replaceAll("\\s+", " ");
-    if (n.equals(".") || n.equals("..")) n = "file";
-    if (n.length() > 255) n = n.substring(0, 255);
+    if (n.equals(".") || n.equals(".."))
+      n = "file";
+    if (n.length() > 255)
+      n = n.substring(0, 255);
     return n;
   }
 
@@ -101,7 +104,7 @@ public class FileService {
   }
 
   // 서버에서 생성한 임시 파일을 파일 관리 규칙에 맞게 저장한다.
-  // 1. size 체크 -> File meta sava
+  // 1. size 체크 -> File meta save
   // 2. storage/{id} 위치로 이동
   @Transactional
   public FileResponse saveLocal(Path tempFile, String fileName, String contentType) {

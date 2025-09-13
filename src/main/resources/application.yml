@@ -1,10 +1,12 @@
 spring:
   application:
     name: hrbank
+
   servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 30MB
+
   datasource:
     url: jdbc:postgresql://localhost:5432/hrbank
     username: hrbank_user
@@ -18,8 +20,7 @@ spring:
   # JPA
   jpa:
     hibernate:
-      ddl-auto: validate
-      # create, create-drop, update, validate, none
+      ddl-auto: validate # create | create-drop | update | validate | none
     show-sql: true
     properties:
       hibernate:
@@ -29,6 +30,9 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         physical_naming_strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
         jdbc.time_zone: UTC
+        jdbc.batch_size: 100       # [추가] batch insert/update 시 한번에 100개씩 처리 → 대량 작업 성능 향상
+        order_inserts: true        # [추가] insert문을 같은 엔티티 기준으로 모아 순서 보장 → DB 성능 최적화
+        order_updates: true        # [추가] update문도 순서 정렬 → 락 경합 줄임
     open-in-view: false
 
   # ErrorMessage
@@ -65,6 +69,9 @@ server:
       remote-ip-header: x-forwarded-for
       protocol-header: x-forwarded-proto
       internal-proxies: 10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|127\.0\.0\.1
+    max-swallow-size: -1
+    # [추가] 업로드 제한 무시(-1) → 대용량 파일 업로드 시 Tomcat이 요청 버퍼를 삼키지 않고 그대로 전달
+
 
 # log
 logging:
@@ -77,3 +84,12 @@ logging:
     # Spring Web
     org.springframework.web: trace
     org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
+
+#file storage
+hrbank:
+  storage:
+    root: ./storage
+
+  backup:
+    cron: "0 0 * * * *"      # 매 시 정각
+    timezone: "UTC"   # 글로벌 서비스

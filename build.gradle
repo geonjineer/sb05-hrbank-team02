@@ -20,9 +20,7 @@ configurations {
     }
 }
 
-repositories {
-    mavenCentral()
-}
+repositories { mavenCentral() }
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
@@ -39,20 +37,26 @@ dependencies {
     implementation 'org.mapstruct:mapstruct:1.6.3'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
-    // springdoc(swagger)
+    // springdoc
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
 
-
-    // QueryDSL JPA
+    // QueryDSL
     implementation 'com.querydsl:querydsl-jpa:5.1.0:jakarta'
-
-    // QueryDSL Annotation Processor
     annotationProcessor 'com.querydsl:querydsl-apt:5.1.0:jakarta'
     annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
     annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
 
+    // @ConfigurationProperties 메타데이터
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 }
 
-tasks.named('test') {
-    useJUnitPlatform()
+tasks.named('test') { useJUnitPlatform() }
+
+// ✅ Q타입(예: QBackup) 생성 경로를 소스셋에 추가
+sourceSets {
+    main {
+        java {
+            srcDirs += files("$buildDir/generated/sources/annotationProcessor/java/main")
+        }
+    }
 }

@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS "files"
 CREATE TABLE IF NOT EXISTS "backups"
 (
     "id"         BIGSERIAL PRIMARY KEY,
-    "file_id"    BIGINT      NOT NULL,
+    "file_id"    BIGINT      NULL,
     "worker"     VARCHAR(50) NOT NULL,
     "started_at" timestamptz NOT NULL,
     "ended_at"   timestamptz NOT NULL,

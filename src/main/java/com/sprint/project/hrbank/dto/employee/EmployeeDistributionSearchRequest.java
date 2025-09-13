@@ -13,7 +13,8 @@ public record EmployeeDistributionSearchRequest(
     Set<String> allowedGroupBy = Set.of("department", "position");
     String groupBy = SearchRequestNormalizer.normalizeString(
         r.groupBy(), allowedGroupBy, "department");
-    EmployeeStatus status = !r.status().equals(EmployeeStatus.ACTIVE)
+    EmployeeStatus status = (r.status == null
+        || !r.status().equals(EmployeeStatus.ACTIVE))
         ? EmployeeStatus.ACTIVE : r.status();
 
     return new EmployeeDistributionSearchRequest(groupBy, status);

@@ -7,30 +7,28 @@ import com.sprint.project.hrbank.dto.employee.EmployeeGroupCountRow;
 import com.sprint.project.hrbank.dto.employee.EmployeeTrendDto;
 import com.sprint.project.hrbank.dto.employee.EmployeeTrendSearchRequest;
 import com.sprint.project.hrbank.entity.EmployeeStatus;
+import com.sprint.project.hrbank.exception.BusinessException;
+import com.sprint.project.hrbank.exception.ErrorCode;
 import com.sprint.project.hrbank.repository.EmployeeRepository;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EmployeeStatsService {
 
   private final EmployeeRepository employeeRepository;
 
-  private static final Set<String> DATE_UNITS = Set.of("day", "week", "month", "quarter", "year");
-  private static final Set<String> GROUP_BY = Set.of("department", "position");
-
   @Transactional(readOnly = true)
   public EmployeeTrendDto getEmployeeTrend(EmployeeTrendSearchRequest request) {
 
-    String unit = DATE_UNITS.contains(request.unit())
-        ? request.unit() : "month";
-    LocalDate to = request.to() == null ? LocalDate.now() : request.to();
-    LocalDate from = request.from() == null ? calculateFrom(unit) : request.from();
+    LocalDate to = request.to();
+    LocalDate from = request.from();
 
     long count = employeeRepository.searchCountByDate(to);
     long prev = employeeRepository.searchCountByDate(from);
@@ -50,9 +48,8 @@ public class EmployeeStatsService {
   public List<EmployeeDistributionDto> getEmployeeDistribution(
       EmployeeDistributionSearchRequest request) {
 
-    String groupKey = GROUP_BY.contains(request.groupBy())
-        ? request.groupBy() : "department";
-    EmployeeStatus status = request.status() == null ? EmployeeStatus.ACTIVE : request.status();
+    String groupKey = request.groupBy();
+    EmployeeStatus status = request.status();
 
     long totalCount = employeeRepository.countTotalByStatus(status);
     List<EmployeeGroupCountRow> rows = employeeRepository.searchCountByGroup(groupKey, status);
@@ -81,22 +78,11 @@ public class EmployeeStatsService {
         : request.toDate();
 
     if (from.isAfter(to)) {
-      throw new IllegalArgumentException("fromDate 는 toDate 이후일 수 없습니다.");
+      log.warn("date range invalid: from {} to {}", from, to);
+      throw new BusinessException(ErrorCode.DATE_RANGE_INVALID, "dateRange", "fromDate", "toDate");
     }
 
     return employeeRepository.searchCountByDateBetween(request.employeeStatus(), from, to);
-  }
-
-  private LocalDate calculateFrom(String unit) {
-
-    return switch (unit) {
-      case "day" -> LocalDate.now().minusDays(12);
-      case "week" -> LocalDate.now().minusWeeks(12);
-      case "month" -> LocalDate.now().minusMonths(12);
-      case "quarter" -> LocalDate.now().minusMonths(12 * 3);
-      case "year" -> LocalDate.now().minusYears(12);
-      default -> LocalDate.now().minusMonths(12);
-    };
   }
 
 }

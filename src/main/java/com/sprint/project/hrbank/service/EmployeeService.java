@@ -43,8 +43,6 @@ public class EmployeeService {
   private final ChangeLogService changeLogService;
   private final ChangeLogCreateRequestMapper changeLogCreateRequestMapper;
 
-  private static final Set<String> ALLOWED_SORT = Set.of("name", "employeeNumber", "hireDate");
-
   @Transactional
   public EmployeeDto create(EmployeeCreateRequest request, FileResponse profileResponse) {
     String name = request.name();
@@ -85,17 +83,8 @@ public class EmployeeService {
 
   @Transactional(readOnly = true)
   public CursorPageResponse<EmployeeDto> find(EmployeeSearchRequest request) {
-    int size = (request.size() == null || request.size() <= 0) ? 10 : request.size();
-
-    if (request.hireDateFrom() != null && request.hireDateTo() != null
-        && request.hireDateFrom().isAfter(request.hireDateTo())) {
-      log.warn("Hire date from and hire date are not same");
-      throw new BusinessException(ErrorCode.DATE_RANGE_INVALID, "hireDateFrom", "hireDateTo");
-    }
-
-    // sortField: 정렬 기준으로 name, employeeNumber, hireDate 중 무엇을 쓸 건지 정하고
-    // 셋 중 어디에도 해당하지 않으면 name을 기준으로 정렬함
-    String sortField = ALLOWED_SORT.contains(request.sortField()) ? request.sortField() : "name";
+    int size = request.size();
+    String sortField = request.sortField();
     // 오름차순, 내림차순 정렬 결정
     boolean asc = !"desc".equalsIgnoreCase(request.sortDirection());
 
@@ -211,7 +200,7 @@ public class EmployeeService {
     if (employeeRepository.existsByName(name)) {
 
       log.warn("Duplicate employee name: {}", name);
-      throw new BusinessException(ErrorCode.EMPLOYEE_NAME_DUPLICATE, "name");
+      throw new BusinessException(ErrorCode.EMPLOYEE_NAME_DUPLICATE, "employeeName");
     }
   }
 

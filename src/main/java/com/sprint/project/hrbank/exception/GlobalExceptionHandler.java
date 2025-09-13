@@ -2,7 +2,6 @@ package com.sprint.project.hrbank.exception;
 
 import com.sprint.project.hrbank.dto.common.ErrorResponse;
 import jakarta.annotation.Nullable;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -43,7 +42,9 @@ public class GlobalExceptionHandler {
     }
 
     for (String ex : extras) {
-      if (ex != null && !ex.isBlank()) parts.add("[" + ex + "]");
+      if (ex != null && !ex.isBlank()) {
+        parts.add("[" + ex + "]");
+      }
     }
 
     return String.join(" ", parts);
@@ -80,6 +81,7 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(BusinessException.class)
   public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e) {
+    log.warn("BusinessException: {}", e.getMessage(), e);
     ErrorCode code = e.getCode();
     String details = messageSource.getMessage(code.name(), e.getArgs(),
         LocaleContextHolder.getLocale());

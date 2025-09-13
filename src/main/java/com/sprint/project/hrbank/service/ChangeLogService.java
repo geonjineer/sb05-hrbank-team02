@@ -9,6 +9,8 @@ import com.sprint.project.hrbank.dto.changeLog.DiffDto;
 import com.sprint.project.hrbank.dto.common.CursorPageResponse;
 import com.sprint.project.hrbank.entity.ChangeLog;
 import com.sprint.project.hrbank.entity.ChangeLogDiff;
+import com.sprint.project.hrbank.exception.BusinessException;
+import com.sprint.project.hrbank.exception.ErrorCode;
 import com.sprint.project.hrbank.mapper.ChangeLogDiffMapper;
 import com.sprint.project.hrbank.mapper.ChangeLogMapper;
 import com.sprint.project.hrbank.mapper.CursorCodec;
@@ -16,14 +18,15 @@ import com.sprint.project.hrbank.mapper.CursorCodec.CursorPayload;
 import com.sprint.project.hrbank.mapper.CursorPageAssembler;
 import com.sprint.project.hrbank.repository.ChangeLogRepository;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ChangeLogService {
 
   private final ChangeLogRepository changeLogRepository;
@@ -74,8 +77,7 @@ public class ChangeLogService {
       lastId = c.id();
     } else if (request.idAfter() != null) {
       Long idAfter = request.idAfter();
-      ChangeLog last = changeLogRepository.findById(idAfter)
-          .orElseThrow(() -> new NoSuchElementException("change log not found id: " + idAfter));
+      ChangeLog last = validateId(idAfter);
 
       lastSortValue = switch (sortField) {
         case "ipAddress" -> last.getIpAddress();
@@ -128,6 +130,10 @@ public class ChangeLogService {
 
   private ChangeLog validateId(Long id) {
     return changeLogRepository.findById(id)
-        .orElseThrow(() -> new NoSuchElementException("change log id not found: " + id));
+        .orElseThrow(() -> {
+          log.warn("change log not found id: {}", id);
+          return new BusinessException(ErrorCode.CHANGE_LOG_NOT_FOUND, "changeLogId");
+        });
   }
+
 }

@@ -1,44 +1,54 @@
 package com.sprint.project.hrbank.dto.changeLog;
 
 import com.sprint.project.hrbank.entity.ChangeLogType;
-import jakarta.validation.constraints.Size;
+import com.sprint.project.hrbank.validation.DateRange;
+import jakarta.validation.constraints.PastOrPresent;
 import java.time.Instant;
+import java.util.Set;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
+import static com.sprint.project.hrbank.normalizer.SearchRequestNormalizer.*;
 
+@DateRange(from = "atFrom", to = "atTo")
 public record ChangeLogSearchRequest(
     String employeeNumber,
     ChangeLogType type,
     String memo,
     String ipAddress,
-    @DateTimeFormat(iso = ISO.DATE) Instant atFrom,
-    @DateTimeFormat(iso = ISO.DATE) Instant atTo,
+
+    @DateTimeFormat(iso = ISO.DATE_TIME)
+    Instant atFrom,
+
+    @PastOrPresent(message = "DATE_PAST_OR_PRESENT")
+    @DateTimeFormat(iso = ISO.DATE_TIME)
+    Instant atTo,
+
     Long idAfter,
     String cursor,
-
-    @Size(min = 1, max = 100, message = "페이지 크기는 1 이상 100 이하여야 합니다")
     Integer size,
-    String sortField,
-    String sortDirection
+    String sortField, // at || ipAddress
+    String sortDirection // desc || asc
 ) {
 
-  public ChangeLogSearchRequest {
-    if (size == null) {
-      size = 10;
-    }
-    if (!sortField.equals("ipAddress") && !sortField.equals("at")) {
-      sortField = "at";
-    }
-    if (!sortDirection.equals("asc") && !sortDirection.equals("desc")) {
-      sortDirection = "desc";
-    }
-    if (atTo != null && atFrom != null && atTo.isBefore(atFrom)) {
-      throw new IllegalArgumentException("atTo는 atFrom 이전일 수 없습니다.");
-    }
-    if (atTo != null && atTo.isBefore(Instant.now())) {
-      throw new IllegalArgumentException("atTo는 현재 시간 이후일 수 없습니다.");
-    }
+  public static ChangeLogSearchRequest of(ChangeLogSearchRequest r) {
+    Integer size = clampSize(r.size, 10, 1, 100);
 
+    Set<String> allowedFields = Set.of("at", "ipAddress");
+    String sortField = normalizeString(r.sortField, allowedFields, "at");
+    String sortDirection = normalizeSortDirection(r.sortDirection, "desc");
+
+    return new ChangeLogSearchRequest(
+        r.employeeNumber(),
+        r.type(),
+        r.memo(),
+        r.ipAddress(),
+        r.atFrom(),
+        r.atTo(),
+        r.idAfter(),
+        r.cursor(),
+        size,
+        sortField,
+        sortDirection
+    );
   }
-
 }

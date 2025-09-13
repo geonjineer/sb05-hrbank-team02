@@ -16,6 +16,7 @@ import com.sprint.project.hrbank.service.EmployeeStatsService;
 import com.sprint.project.hrbank.service.FileService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -56,38 +57,43 @@ public class EmployeeController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<EmployeeDto> findById(@PathVariable long id) {
+  public ResponseEntity<EmployeeDto> findById(
+      @PathVariable @Positive(message = "ENTITY_ID_MIN") Long id) {
     return ResponseEntity.ok().body(employeeService.findById(id));
   }
 
   @GetMapping
   public CursorPageResponse<EmployeeDto> findAll(
       @ModelAttribute @Valid EmployeeSearchRequest request) {
-    return employeeService.find(request);
+    EmployeeSearchRequest filtered = EmployeeSearchRequest.of(request);
+    return employeeService.find(filtered);
   }
 
   @GetMapping("/stats/trend")
   public ResponseEntity<EmployeeTrendDto> findTrend(
       @ModelAttribute @Valid EmployeeTrendSearchRequest request) {
-    return ResponseEntity.ok(employeeStatsService.getEmployeeTrend(request));
+    EmployeeTrendSearchRequest filtered = EmployeeTrendSearchRequest.of(request);
+    return ResponseEntity.ok(employeeStatsService.getEmployeeTrend(filtered));
   }
 
   @GetMapping("/stats/distribution")
   public ResponseEntity<List<EmployeeDistributionDto>> findDistribution(
       @ModelAttribute EmployeeDistributionSearchRequest request) {
-    return ResponseEntity.ok(employeeStatsService.getEmployeeDistribution(request));
+    EmployeeDistributionSearchRequest filtered = EmployeeDistributionSearchRequest.of(request);
+    return ResponseEntity.ok(employeeStatsService.getEmployeeDistribution(filtered));
   }
 
   @GetMapping("/count")
   public ResponseEntity<Long> getEmployeeCount(
       @ModelAttribute @Valid EmployeeCountSearchRequest request
   ) {
-    return ResponseEntity.ok(employeeStatsService.getEmployeeCount(request));
+    EmployeeCountSearchRequest filtered = EmployeeCountSearchRequest.of(request);
+    return ResponseEntity.ok(employeeStatsService.getEmployeeCount(filtered));
   }
 
   @PutMapping("/{id}")
   public ResponseEntity<EmployeeDto> update(
-      @PathVariable long id,
+      @PathVariable @Positive(message = "ENTITY_ID_MIN") Long id,
       @RequestPart @Valid EmployeeUpdateRequest request,
       @RequestPart(required = false) MultipartFile profile,
       HttpServletRequest httpRequest
@@ -102,7 +108,7 @@ public class EmployeeController {
 
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> delete(
-      @PathVariable long id,
+      @PathVariable @Positive(message = "ENTITY_ID_MIN") Long id,
       HttpServletRequest httpRequest
   ) {
     employeeService.deleteWithLog(id, httpRequest.getRemoteAddr());

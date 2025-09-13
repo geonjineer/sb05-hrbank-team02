@@ -20,17 +20,13 @@ public class SearchRequestNormalizer {
     return Math.min(size, max);
   }
 
-  // sortField 화이트리스트 검사: 미허용이면 기본값 반환
-  public static String normalizeSortField(String raw, Set<String> allowed, String def) {
+  // String 화이트리스트 검사: 미허용이면 기본값 반환
+  public static String normalizeString(String raw, Set<String> allowed, String def) {
     if (raw == null || raw.isBlank()) {
       return def;
     }
-    for (String a : allowed) {
-      if (a.equalsIgnoreCase(raw)) {
-        return a;
-      }
-    }
-    return def;
+    String v = raw.toLowerCase();
+    return allowed.contains(v) ? v : def;
   }
 
   // sortDirection: asc/desc만 허용, 소문자로 표준화
@@ -50,6 +46,18 @@ public class SearchRequestNormalizer {
   // Instant 기본값 설정
   public static Instant defaultInstant(Instant raw, Instant def) {
     return (raw == null) ? def : raw;
+  }
+
+  public static LocalDate calculateFromUnit(LocalDate to, String unit, int periods) {
+
+    return switch (unit) {
+      case "day" -> to.minusDays(periods);
+      case "week" -> to.minusWeeks(periods);
+      case "month" -> to.minusMonths(periods);
+      case "quarter" -> to.minusMonths(periods * 3L);
+      case "year" -> to.minusYears(periods);
+      default -> to.minusMonths(periods);
+    };
   }
 
 }

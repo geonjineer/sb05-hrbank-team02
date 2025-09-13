@@ -6,6 +6,8 @@ import com.sprint.project.hrbank.dto.department.DepartmentDto;
 import com.sprint.project.hrbank.dto.department.DepartmentSearchRequest;
 import com.sprint.project.hrbank.dto.department.DepartmentUpdateRequest;
 import com.sprint.project.hrbank.entity.Department;
+import com.sprint.project.hrbank.exception.BusinessException;
+import com.sprint.project.hrbank.exception.ErrorCode;
 import com.sprint.project.hrbank.mapper.CursorCodec;
 import com.sprint.project.hrbank.mapper.CursorCodec.CursorPayload;
 import com.sprint.project.hrbank.mapper.CursorPageAssembler;
@@ -14,16 +16,15 @@ import com.sprint.project.hrbank.repository.DepartmentRepository;
 import com.sprint.project.hrbank.repository.EmployeeRepository;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class DepartmentService {
 
   private final DepartmentRepository departmentRepository;
@@ -31,7 +32,6 @@ public class DepartmentService {
   private final DepartmentMapper departmentMapper;
   private final CursorCodec cursorCodec;
   private final CursorPageAssembler cursorPageAssembler;
-  private static final Set<String> ALLOWED_SORT = Set.of("name", "establishedDate");
 
   @Transactional
   public DepartmentDto create(DepartmentCreateRequest request) {
@@ -60,14 +60,8 @@ public class DepartmentService {
 
   @Transactional(readOnly = true)
   public CursorPageResponse<DepartmentDto> findAll(DepartmentSearchRequest request) {
-    int raw = (request.size() == null || request.size() < 1) ? 10 : request.size();
-    int size = Math.min(raw, 100);
-
-    String sortField = Optional.ofNullable(request.sortField())
-        .map(String::trim)
-        .filter(s -> !s.isEmpty())
-        .filter(ALLOWED_SORT::contains)
-        .orElse("establishedDate");
+    Integer size = request.size();
+    String sortField = request.sortField();
 
     boolean asc = !"desc".equalsIgnoreCase(request.sortDirection());
 
@@ -80,8 +74,7 @@ public class DepartmentService {
       lastId = c.id();
     } else if (request.idAfter() != null) {
       Long idAfter = request.idAfter();
-      Department department = departmentRepository.findById(idAfter)
-          .orElseThrow(() -> new NoSuchElementException("Department with id " + idAfter + " not found"));
+      Department department = validateId(idAfter);
 
       lastSortVal = switch (sortField) {
         case "name" -> department.getName();
@@ -92,17 +85,16 @@ public class DepartmentService {
       lastId = department.getId();
     }
 
-    List<Department> rows = departmentRepository
-        .search(request, size + 1, sortField, asc, lastSortVal, lastId);
-
-    boolean hasNext = rows.size() > size;
-    if (hasNext) {
-      rows = rows.subList(0, size);
-    }
-
-    List<DepartmentDto> content = rows.stream()
-        .map(dept -> departmentMapper.toDepartmentDto(dept, employeeRepository.countByDepartment(dept)))
+    List<DepartmentDto> content = departmentRepository
+        .search(request, size + 1, sortField, asc, lastSortVal, lastId).stream()
+        .map(dept -> departmentMapper.toDepartmentDto(dept,
+            employeeRepository.countByDepartment(dept)))
         .toList();
+
+    boolean hasNext = content.size() > size;
+    if (hasNext) {
+      content = content.subList(0, size);
+    }
 
     Function<DepartmentDto, String> sortValFn = d -> switch (sortField) {
       case "name" -> d.name() == null ? "" : d.name();
@@ -130,7 +122,8 @@ public class DepartmentService {
     department.setDescription(request.description());
     department.setEstablishedDate(request.establishedDate());
 
-    return departmentMapper.toDepartmentDto(department, employeeRepository.countByDepartment(department));
+    return departmentMapper.toDepartmentDto(department,
+        employeeRepository.countByDepartment(department));
   }
 
   @Transactional
@@ -138,8 +131,7 @@ public class DepartmentService {
     Department department = validateId(id);
 
     if (employeeRepository.existsByDepartment(department)) {
-      throw new IllegalArgumentException("Deletion failed: Employees are still assigned to\n" +
-          "  this department.");
+      throw new BusinessException(ErrorCode.DEPARTMENT_HAS_EMPLOYEES);
     }
 
     // 3. 부서 삭제
@@ -148,12 +140,16 @@ public class DepartmentService {
 
   private Department validateId(Long id) {
     return departmentRepository.findById(id)
-        .orElseThrow(() -> new NoSuchElementException("Department not found with id: " + id));
+        .orElseThrow(() -> {
+          log.warn("Department not found with id {}", id);
+          return new BusinessException(ErrorCode.DEPARTMENT_NOT_FOUND, "departmentId");
+        });
   }
 
   private void validateUniqueName(String name) {
     if (employeeRepository.existsByName(name)) {
-      throw new IllegalArgumentException("Department with name " + name + " already exists");
+      log.warn("Duplicate name found for department {}", name);
+      throw new BusinessException(ErrorCode.DEPARTMENT_NAME_DUPLICATE, "departmentName");
     }
   }
 }

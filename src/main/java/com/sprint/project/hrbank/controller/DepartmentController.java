@@ -29,8 +29,10 @@ public class DepartmentController {
   private final DepartmentService departmentService;
 
   @PostMapping
-  public ResponseEntity<DepartmentDto> create(@Valid @RequestBody DepartmentCreateRequest req) {
+  public ResponseEntity<DepartmentDto> create(
+      @RequestBody @Valid DepartmentCreateRequest req) {
     DepartmentDto created = departmentService.create(req);
+
     return ResponseEntity
         .status(HttpStatus.CREATED)
         .body(created);
@@ -39,11 +41,14 @@ public class DepartmentController {
   @GetMapping
   public CursorPageResponse<DepartmentDto> findAll(
       @ModelAttribute DepartmentSearchRequest request) {
-    return departmentService.findAll(request);
+    DepartmentSearchRequest filtered = DepartmentSearchRequest.of(request);
+
+    return departmentService.findAll(filtered);
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<DepartmentDto> findById(@PathVariable @Positive Long id) {
+  public ResponseEntity<DepartmentDto> findById(
+      @PathVariable @Positive(message = "ENTITY_ID_MIN") Long id) {
     DepartmentDto department = departmentService.find(id);
     return ResponseEntity
         .status(HttpStatus.OK)
@@ -52,14 +57,15 @@ public class DepartmentController {
 
   @PatchMapping("/{id}")
   public ResponseEntity<DepartmentDto> update(
-      @PathVariable @Positive Long id,
-      @Valid @RequestBody DepartmentUpdateRequest request) {
+      @PathVariable @Positive(message = "ENTITY_ID_MIN") Long id,
+      @RequestBody @Valid DepartmentUpdateRequest request) {
     return
         ResponseEntity.ok().body(departmentService.update(id, request));
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> delete(@PathVariable @Positive Long id) {
+  public ResponseEntity<Void> delete(
+      @PathVariable @Positive(message = "ENTITY_ID_MIN") Long id) {
     departmentService.delete(id);
     return
         ResponseEntity.status(HttpStatus.NO_CONTENT).build();

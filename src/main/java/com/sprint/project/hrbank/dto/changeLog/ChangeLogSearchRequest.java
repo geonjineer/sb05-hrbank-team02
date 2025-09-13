@@ -1,19 +1,28 @@
 package com.sprint.project.hrbank.dto.changeLog;
 
 import com.sprint.project.hrbank.entity.ChangeLogType;
+import com.sprint.project.hrbank.validation.DateRange;
+import jakarta.validation.constraints.PastOrPresent;
 import java.time.Instant;
 import java.util.Set;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import static com.sprint.project.hrbank.normalizer.SearchRequestNormalizer.*;
 
+@DateRange(from = "atFrom", to = "atTo")
 public record ChangeLogSearchRequest(
     String employeeNumber,
     ChangeLogType type,
     String memo,
     String ipAddress,
-    @DateTimeFormat(iso = ISO.DATE_TIME) Instant atFrom,
-    @DateTimeFormat(iso = ISO.DATE_TIME) Instant atTo,
+
+    @DateTimeFormat(iso = ISO.DATE_TIME)
+    Instant atFrom,
+
+    @PastOrPresent(message = "DATE_PAST_OR_PRESENT")
+    @DateTimeFormat(iso = ISO.DATE_TIME)
+    Instant atTo,
+
     Long idAfter,
     String cursor,
     Integer size,

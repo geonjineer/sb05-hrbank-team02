@@ -40,7 +40,7 @@ public class ChangeLogController {
 
   @GetMapping("/count")
   public Long count(
-      @ModelAttribute ChangeLogCountSearchRequest request
+      @ModelAttribute @Valid ChangeLogCountSearchRequest request
   ) {
     ChangeLogCountSearchRequest filtered = ChangeLogCountSearchRequest.of(request);
 

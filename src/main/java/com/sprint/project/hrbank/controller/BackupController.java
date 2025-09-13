@@ -1,9 +1,8 @@
 package com.sprint.project.hrbank.controller;
 
-import com.sprint.project.hrbank.dto.backup.BackupItemDto;
+import com.sprint.project.hrbank.dto.backup.BackupDto;
 import com.sprint.project.hrbank.dto.backup.BackupSearchRequest;
 import com.sprint.project.hrbank.dto.common.CursorPageResponse;
-import com.sprint.project.hrbank.entity.BackupStatus;
 import com.sprint.project.hrbank.service.BackupReadService;
 import com.sprint.project.hrbank.service.BackupService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,44 +15,28 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class BackupController {
 
-  private final BackupService backupService;       // 실행
-  private final BackupReadService backupReadService; // 조회
+  private final BackupService backupService;
+  private final BackupReadService backupReadService;
 
-  // POST /api/backups : 데이터 백업 생성 (요청자 IP)
+  // 수동 백업 실행: {작업자} = 요청자 IP
   @PostMapping
-  public ResponseEntity<BackupItemDto> create(HttpServletRequest req) {
-    String ip = extractClientIp(req);
+  public ResponseEntity<BackupDto> create(HttpServletRequest req) {
+    String ip = req.getRemoteAddr(); // 프록시 처리 app 설정을 신뢰
     backupService.runBackup(ip);
-
-    // 방금 실행한 결과를 latest(COMPLETED 기준)로 반환하는 간단 전략
-    BackupItemDto latest = backupReadService.latest(BackupStatus.COMPLETED);
+    // 바로 최신 1건 조회하여 반환
+    BackupDto latest = backupReadService.findLatestCompletedOrNull();
     return ResponseEntity.ok(latest);
   }
 
-  // GET /api/backups/latest : 최근 백업 1건 조회 (상태 기본 COMPLETED)
-  @GetMapping("/latest")
-  public ResponseEntity<BackupItemDto> latest(
-      @RequestParam(name = "status", required = false, defaultValue = "COMPLETED")
-      BackupStatus status
-  ) {
-    return ResponseEntity.ok(backupReadService.latest(status));
-  }
-
-  // GET /api/backups : 목록(커서 페이징)
+  // 목록(커서) 조회: 쿼리파라미터를 DTO로 바인딩
   @GetMapping
-  public ResponseEntity<CursorPageResponse<BackupItemDto>> list(
-      @ModelAttribute BackupSearchRequest req
-  ) {
-    return ResponseEntity.ok(backupReadService.search(req));
+  public ResponseEntity<CursorPageResponse<BackupDto>> list(@ModelAttribute BackupSearchRequest request) {
+    return ResponseEntity.ok(backupReadService.search(request));
   }
 
-  private String extractClientIp(HttpServletRequest req) {
-    String xff = req.getHeader("X-Forwarded-For");
-    if (xff != null && !xff.isBlank()) {
-      String first = xff.split(",")[0].trim();
-      if (!first.isBlank()) return first;
-    }
-    String ip = req.getRemoteAddr();
-    return (ip == null || ip.isBlank()) ? "unknown" : ip;
+  // 최근 상태별 1건
+  @GetMapping("/latest")
+  public ResponseEntity<BackupDto> latest(@RequestParam(defaultValue = "COMPLETED") String status) {
+    return ResponseEntity.ok(backupReadService.findLatestByStatusOrNull(status));
   }
 }

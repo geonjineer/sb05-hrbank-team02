@@ -1,7 +1,9 @@
 package com.sprint.project.hrbank.configuration;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import lombok.Getter;
+import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
 
 @Getter
 @ConfigurationProperties(prefix = "hrbank")
@@ -10,15 +12,15 @@ public class HrbankProperties {
   private final Storage storage = new Storage();
   private final Backup backup = new Backup();
 
+  @Setter
   @Getter
   public static class Storage {
     /**
      * 파일 저장 루트 디렉토리 경로 (기본값: ./storage)
      */
     private String root = "./storage";
-    public void setRoot(String root) { this.root = root; }
   }
-
+  @Setter
   @Getter
   public static class Backup {
     /**
@@ -30,7 +32,5 @@ public class HrbankProperties {
      */
     private String timezone = "UTC";
 
-    public void setCron(String cron) { this.cron = cron; }
-    public void setTimezone(String timezone) { this.timezone = timezone; }
   }
 }

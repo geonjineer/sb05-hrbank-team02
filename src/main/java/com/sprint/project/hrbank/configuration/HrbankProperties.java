@@ -15,14 +15,17 @@ public class HrbankProperties {
   @Setter
   @Getter
   public static class Storage {
+
     /**
      * 파일 저장 루트 디렉토리 경로 (기본값: ./storage)
      */
     private String root = "./storage";
   }
+
   @Setter
   @Getter
   public static class Backup {
+
     /**
      * 스케줄러 실행 cron 표현식 (예: "0 0 * * * *" → 매시 정각)
      */

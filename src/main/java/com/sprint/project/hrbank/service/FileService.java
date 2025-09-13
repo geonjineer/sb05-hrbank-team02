@@ -4,13 +4,11 @@ import com.sprint.project.hrbank.dto.file.FileResponse;
 import com.sprint.project.hrbank.entity.File;
 import com.sprint.project.hrbank.exception.FileStorageException;
 import com.sprint.project.hrbank.repository.FileRepository;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -88,10 +86,12 @@ public class FileService {
         .toString();
     n = n.replaceAll("[\\\\/:*?\"<>|]", "_"); // Windows 금지 문자
     n = n.replaceAll("\\s+", " ");
-    if (n.equals(".") || n.equals(".."))
+    if (n.equals(".") || n.equals("..")) {
       n = "file";
-    if (n.length() > 255)
+    }
+    if (n.length() > 255) {
       n = n.substring(0, 255);
+    }
     return n;
   }
 

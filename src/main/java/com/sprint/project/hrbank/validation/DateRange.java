@@ -13,11 +13,16 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = DateRangeValidator.class)
 public @interface DateRange {
+
   String message() default "DATE_RANGE_INVALID";
+
   String from();
+
   String to();
+
   boolean allowEqual() default true;
 
   Class<?>[] groups() default {};
+
   Class<? extends Payload>[] payload() default {};
 }

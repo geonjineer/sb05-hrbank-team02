@@ -8,7 +8,12 @@ import com.sprint.project.hrbank.service.BackupService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/backups")
@@ -30,7 +35,8 @@ public class BackupController {
 
   // 목록(커서) 조회: 쿼리파라미터를 DTO로 바인딩
   @GetMapping
-  public ResponseEntity<CursorPageResponse<BackupDto>> list(@ModelAttribute BackupSearchRequest request) {
+  public ResponseEntity<CursorPageResponse<BackupDto>> list(
+      @ModelAttribute BackupSearchRequest request) {
     return ResponseEntity.ok(backupReadService.search(request));
   }
 

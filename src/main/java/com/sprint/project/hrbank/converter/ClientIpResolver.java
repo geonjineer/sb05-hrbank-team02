@@ -5,7 +5,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class ClientIpResolver {
-  private ClientIpResolver() {}
+
+  private ClientIpResolver() {
+  }
 
   public static String resolve(HttpServletRequest request) {
     // 1) RFC 7239 Forwarded: for=...
@@ -19,7 +21,9 @@ public final class ClientIpResolver {
         }
         // IPv4:port만 포트 제거 (IPv6은 그대로)
         int idx = v.indexOf(':');
-        if (idx > 0 && v.contains(".")) v = v.substring(0, idx);
+        if (idx > 0 && v.contains(".")) {
+          v = v.substring(0, idx);
+        }
         return normalizeLoopback(v);
       }
     }
@@ -29,7 +33,9 @@ public final class ClientIpResolver {
     if (xff != null && !xff.isBlank()) {
       String v = xff.split(",")[0].trim();
       int idx = v.indexOf(':');
-      if (idx > 0 && v.contains(".")) v = v.substring(0, idx); // IPv4:port → IP만
+      if (idx > 0 && v.contains(".")) {
+        v = v.substring(0, idx); // IPv4:port → IP만
+      }
       return normalizeLoopback(v);
     }
 
@@ -38,7 +44,9 @@ public final class ClientIpResolver {
   }
 
   private static String normalizeLoopback(String ip) {
-    if (ip == null) return null;
+    if (ip == null) {
+      return null;
+    }
     return ("::1".equals(ip) || "0:0:0:0:0:0:0:1".equals(ip)) ? "127.0.0.1" : ip;
   }
 }

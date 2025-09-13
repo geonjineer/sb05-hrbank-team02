@@ -22,7 +22,6 @@ import com.sprint.project.hrbank.repository.EmployeeRepository;
 import com.sprint.project.hrbank.repository.FileRepository;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -150,11 +149,11 @@ public class EmployeeService {
     // 2. DTO에 담겨온 ID로 연관 엔티티(부서, 프로필 이미지) 조회
     Department department = validateDepartmentId(request.departmentId());
 
-    if(!employee.getName().equals(request.name())) {
+    if (!employee.getName().equals(request.name())) {
       validateUniqueName(request.name());
     }
 
-    if(!employee.getEmail().equals(request.email())) {
+    if (!employee.getEmail().equals(request.email())) {
       validateUniqueEmail(request.email());
     }
 

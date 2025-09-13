@@ -64,8 +64,8 @@ public class BackupReadService {
         hasNext,
         last -> switch (sortField) {
           case "endedAt" -> last.endedAt();
-          case "status"  -> last.status();
-          default        -> last.startedAt();
+          case "status" -> last.status();
+          default -> last.startedAt();
         },
         BackupDto::id
     );
@@ -99,10 +99,16 @@ public class BackupReadService {
   // --- internal helpers ---
 
   private String normalizeSortField(String f) {
-    if (Objects.equals(f, "endedAt")) return "endedAt";
-    if (Objects.equals(f, "status"))  return "status";
+    if (Objects.equals(f, "endedAt")) {
+      return "endedAt";
+    }
+    if (Objects.equals(f, "status")) {
+      return "status";
+    }
     return "startedAt";
   }
 
-  private boolean hasText(String s) { return s != null && !s.isBlank(); }
+  private boolean hasText(String s) {
+    return s != null && !s.isBlank();
+  }
 }

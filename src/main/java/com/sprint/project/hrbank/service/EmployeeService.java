@@ -43,8 +43,6 @@ public class EmployeeService {
   private final ChangeLogService changeLogService;
   private final ChangeLogCreateRequestMapper changeLogCreateRequestMapper;
 
-  private static final Set<String> ALLOWED_SORT = Set.of("name", "employeeNumber", "hireDate");
-
   @Transactional
   public EmployeeDto create(EmployeeCreateRequest request, FileResponse profileResponse) {
     String name = request.name();

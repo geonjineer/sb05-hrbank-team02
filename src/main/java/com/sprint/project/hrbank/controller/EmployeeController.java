@@ -44,7 +44,7 @@ public class EmployeeController {
 
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<EmployeeDto> create(
-      @RequestPart @Valid EmployeeCreateRequest request,
+      @RequestPart(name = "employee") @Valid EmployeeCreateRequest request,
       @RequestPart(required = false) MultipartFile profile,
       HttpServletRequest httpRequest) {
     FileResponse fileResponse = profile == null
@@ -94,7 +94,7 @@ public class EmployeeController {
   @PutMapping("/{id}")
   public ResponseEntity<EmployeeDto> update(
       @PathVariable @Positive(message = "ENTITY_ID_MIN") Long id,
-      @RequestPart @Valid EmployeeUpdateRequest request,
+      @RequestPart(name = "employee") @Valid EmployeeUpdateRequest request,
       @RequestPart(required = false) MultipartFile profile,
       HttpServletRequest httpRequest
   ) {

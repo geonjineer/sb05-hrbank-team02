@@ -35,19 +35,10 @@ public class DepartmentQueryRepositoryImpl implements DepartmentQueryRepository 
 
     // -------- 검색 조건 --------
     // 이름/설명 부분 일치 (keyword)
-    if (hasText(request.keyword())) {
-      where.and(
-          d.name.containsIgnoreCase(request.keyword())
-              .or(d.description.containsIgnoreCase(request.keyword()))
+    if (hasText(request.nameOrDescription())) {
+      where.and(d.name.containsIgnoreCase(request.nameOrDescription())
+          .or(d.description.containsIgnoreCase(request.nameOrDescription()))
       );
-    }
-    // 이름 개별 조건
-    if (hasText(request.name())) {
-      where.and(d.name.containsIgnoreCase(request.name()));
-    }
-    // 설립일(정확 일치) — 필요에 따라 범위검색으로 확장 가능
-    if (request.establishedDate() != null) {
-      where.and(d.establishedDate.eq(request.establishedDate()));
     }
 
     // -------- 커서 조건 (정렬키 + id) --------
@@ -69,7 +60,9 @@ public class DepartmentQueryRepositoryImpl implements DepartmentQueryRepository 
   @Override
   public Long searchCount(@Nullable LocalDate establishedDate) {
     // 정책에 맞춰 null 이면 0L 반환 (Employee 쪽 시그니처와 맞춤)
-    if (establishedDate == null) return 0L;
+    if (establishedDate == null) {
+      return 0L;
+    }
 
     return queryFactory
         .select(d.count())
@@ -83,8 +76,8 @@ public class DepartmentQueryRepositoryImpl implements DepartmentQueryRepository 
   private OrderSpecifier<?> buildPrimaryOrder(String sortField, boolean asc) {
     return switch (sortField) {
       case "establishedDate" -> asc ? d.establishedDate.asc() : d.establishedDate.desc();
-      case "name"            -> asc ? d.name.asc()            : d.name.desc();
-      default                -> asc ? d.name.asc()            : d.name.desc(); // 기본 name
+      case "name" -> asc ? d.name.asc() : d.name.desc();
+      default -> asc ? d.name.asc() : d.name.desc(); // 기본 name
     };
   }
 
@@ -96,7 +89,7 @@ public class DepartmentQueryRepositoryImpl implements DepartmentQueryRepository 
       case "name" -> {
         String value = nullToEmpty(lastSortVal);
         BooleanExpression cmp = asc ? d.name.gt(value) : d.name.lt(value);
-        BooleanExpression eq  = d.name.eq(value);
+        BooleanExpression eq = d.name.eq(value);
         BooleanExpression idc = asc ? d.id.gt(lastId) : d.id.lt(lastId);
         yield cmp.or(eq.and(idc));
       }
@@ -105,7 +98,7 @@ public class DepartmentQueryRepositoryImpl implements DepartmentQueryRepository 
             ? LocalDate.of(1970, 1, 1)
             : LocalDate.parse(lastSortVal);
         BooleanExpression cmp = asc ? d.establishedDate.gt(base) : d.establishedDate.lt(base);
-        BooleanExpression eq  = d.establishedDate.eq(base);
+        BooleanExpression eq = d.establishedDate.eq(base);
         BooleanExpression idc = asc ? d.id.gt(lastId) : d.id.lt(lastId);
         yield cmp.or(eq.and(idc));
       }

@@ -1,15 +1,13 @@
 package com.sprint.project.hrbank.dto.department;
 
-import static com.sprint.project.hrbank.normalizer.SearchRequestNormalizer.*;
-import java.time.LocalDate;
+import static com.sprint.project.hrbank.normalizer.SearchRequestNormalizer.clampSize;
+import static com.sprint.project.hrbank.normalizer.SearchRequestNormalizer.normalizeSortDirection;
+import static com.sprint.project.hrbank.normalizer.SearchRequestNormalizer.normalizeString;
+
 import java.util.Set;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.format.annotation.DateTimeFormat.ISO;
 
 public record DepartmentSearchRequest(
-    String keyword,
-    String name,
-    @DateTimeFormat(iso = ISO.DATE) LocalDate establishedDate,
+    String nameOrDescription,
     Long idAfter,
     String cursor,
     Integer size,
@@ -25,9 +23,7 @@ public record DepartmentSearchRequest(
     String sortDirection = normalizeSortDirection(r.sortDirection, "asc");
 
     return new DepartmentSearchRequest(
-        r.keyword(),
-        r.name(),
-        r.establishedDate(),
+        r.nameOrDescription(),
         r.idAfter(),
         r.cursor(),
         size,

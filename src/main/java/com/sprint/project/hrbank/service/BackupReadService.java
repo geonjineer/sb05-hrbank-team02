@@ -1,15 +1,16 @@
 package com.sprint.project.hrbank.service;
 
-import com.sprint.project.hrbank.dto.backup.BackupItemDto;
+import com.sprint.project.hrbank.dto.backup.BackupDto;
 import com.sprint.project.hrbank.dto.backup.BackupSearchRequest;
 import com.sprint.project.hrbank.dto.common.CursorPageResponse;
 import com.sprint.project.hrbank.entity.Backup;
-import com.sprint.project.hrbank.entity.BackupStatus;
 import com.sprint.project.hrbank.mapper.BackupMapper;
 import com.sprint.project.hrbank.mapper.CursorCodec;
 import com.sprint.project.hrbank.mapper.CursorCodec.CursorPayload;
+import com.sprint.project.hrbank.mapper.CursorPageAssembler;
 import com.sprint.project.hrbank.repository.BackupRepository;
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,89 +18,91 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class BackupReadService {
 
-  private final BackupRepository backupRepository; // 커스텀 search 포함
+  private final BackupRepository backupRepository;
   private final BackupMapper backupMapper;
   private final CursorCodec cursorCodec;
+  private final CursorPageAssembler pageAssembler;
 
-  public BackupItemDto latest(BackupStatus status) {
+  /**
+   * 커서 기반 검색
+   */
+  public CursorPageResponse<BackupDto> search(BackupSearchRequest req) {
+    // 1) 정렬 필드/방향 보정
+    final String sortField = normalizeSortField(req.sortField());
+    final boolean asc = "asc".equalsIgnoreCase(req.sortDirection());
+
+    // 2) 페이지 크기 보정
+    final int size = Math.max(1, Math.min(req.size(), 100));
+
+    // 3) 커서 파싱
+    String lastSortVal = null;
+    Long lastId = null;
+    if (hasText(req.cursor())) {
+      CursorPayload p = cursorCodec.decode(req.cursor(), CursorPayload.class);
+      lastSortVal = p.sortVal();
+      lastId = p.id();
+    } else if (req.idAfter() != null) {
+      lastId = req.idAfter();
+    }
+
+    // 4) DB 조회(size+1)
+    List<Backup> rows = backupRepository.search(
+        req, size + 1, asc, sortField, lastSortVal, lastId
+    );
+
+    // 5) hasNext & pageContent
+    boolean hasNext = rows.size() > size;
+    List<Backup> pageContent = hasNext ? rows.subList(0, size) : rows;
+
+    // 6) 엔티티 -> DTO
+    List<BackupDto> content = pageContent.stream().map(backupMapper::toDto).toList();
+
+    // 7~8) ✅ 커서/nextIdAfter 자동 생성(Assembler에 위임)
+    return pageAssembler.toCursorPage(
+        content,
+        size,
+        hasNext,
+        last -> switch (sortField) {
+          case "endedAt" -> last.endedAt();
+          case "status"  -> last.status();
+          default        -> last.startedAt();
+        },
+        BackupDto::id
+    );
+  }
+
+  /**
+   * 최신 완료(COMPLETED) 1건을 DTO로 반환 (없으면 null)
+   */
+  public BackupDto findLatestCompletedOrNull() {
+    return backupRepository.findTopByStatusOrderByEndedAtDesc(
+            com.sprint.project.hrbank.entity.BackupStatus.COMPLETED)
+        .map(backupMapper::toDto)
+        .orElse(null);
+  }
+
+  /**
+   * 주어진 상태의 최신 1건을 DTO로 반환 (유효하지 않으면 COMPLETED)
+   */
+  public BackupDto findLatestByStatusOrNull(String statusName) {
+    com.sprint.project.hrbank.entity.BackupStatus status;
+    try {
+      status = com.sprint.project.hrbank.entity.BackupStatus.valueOf(statusName.toUpperCase());
+    } catch (Exception ignore) {
+      status = com.sprint.project.hrbank.entity.BackupStatus.COMPLETED;
+    }
     return backupRepository.findTopByStatusOrderByEndedAtDesc(status)
         .map(backupMapper::toDto)
         .orElse(null);
   }
 
-  public CursorPageResponse<BackupItemDto> search(BackupSearchRequest req) {
-    // size 보정
-    int rawSize = (req.size() == null || req.size() <= 0) ? 10 : req.size();
-    int size = Math.min(rawSize, 100);
-
-    // 정렬 필드/방향 보정
-    final String sortField = normalizeSortField(req.sortField());
-    final boolean asc = !"DESC".equalsIgnoreCase(req.sortDirection());
-
-    // 커서 파싱
-    String lastSortVal = null;
-    Long lastId = null;
-    if (req.cursor() != null && !req.cursor().isBlank()) {
-      CursorPayload p = cursorCodec.decode(req.cursor(), CursorPayload.class);
-      lastSortVal = p.sortVal();
-      lastId = p.id();
-    } else if (req.idAfter() != null) {
-      // idAfter만 있을 경우 키 값은 null로 두고 id 비교만 동작
-      lastId = req.idAfter();
-    }
-
-    // DB 조회(size+1) – 정렬키+id 커서를 DB에서 비교
-    List<Backup> rows = backupRepository.search(
-        req.worker(),
-        req.status(),
-        req.startedAtFrom(),
-        req.startedAtTo(),
-        size + 1,
-        sortField,
-        asc,
-        lastSortVal,
-        lastId
-    );
-
-    boolean hasNext = rows.size() > size;
-    if (hasNext) {
-      rows = rows.subList(0, size);
-    }
-
-    // DTO 변환
-    List<BackupItemDto> content = rows.stream()
-        .map(backupMapper::toDto)
-        .toList();
-
-    // nextCursor 계산(마지막 요소의 정렬키 문자열 + id)
-    String nextCursor = null;
-    Long nextIdAfter = null;
-    if (!content.isEmpty()) {
-      BackupItemDto last = content.get(content.size() - 1);
-      String sortValForCursor = switch (sortField) {
-        case "endedAt"  -> nvl(last.endedAt());
-        case "status"   -> last.status() == null ? "" : last.status();
-        default         -> nvl(last.startedAt());
-      };
-      nextCursor = cursorCodec.encode(new CursorPayload(sortValForCursor, last.id()));
-      nextIdAfter = last.id();
-    }
-
-    return CursorPageResponse.<BackupItemDto>builder()
-        .content(content)
-        .nextCursor(nextCursor)
-        .nextIdAfter(nextIdAfter)
-        .size(size)
-        .totalElements(null) // 커서 페이징에서는 보통 제공하지 않음
-        .hasNext(hasNext)
-        .build();
-  }
-
-  private String nvl(String s) { return s == null ? "" : s; }
+  // --- internal helpers ---
 
   private String normalizeSortField(String f) {
-    if ("endedAt".equals(f))  return "endedAt";
-    if ("status".equals(f))   return "status";
-    return "startedAt"; // default
+    if (Objects.equals(f, "endedAt")) return "endedAt";
+    if (Objects.equals(f, "status"))  return "status";
+    return "startedAt";
   }
+
+  private boolean hasText(String s) { return s != null && !s.isBlank(); }
 }

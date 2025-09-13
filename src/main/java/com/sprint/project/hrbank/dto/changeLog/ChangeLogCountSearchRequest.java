@@ -3,7 +3,6 @@ package com.sprint.project.hrbank.dto.changeLog;
 import static com.sprint.project.hrbank.normalizer.SearchRequestNormalizer.defaultInstant;
 
 import com.sprint.project.hrbank.validation.DateRange;
-import jakarta.validation.constraints.PastOrPresent;
 import java.time.Instant;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
@@ -14,7 +13,6 @@ public record ChangeLogCountSearchRequest(
     @DateTimeFormat(iso = ISO.DATE_TIME)
     Instant fromDate,
 
-    @PastOrPresent(message = "DATE_PAST_OR_PRESENT")
     @DateTimeFormat(iso = ISO.DATE_TIME)
     Instant toDate
 ) {

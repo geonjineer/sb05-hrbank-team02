@@ -150,8 +150,13 @@ public class EmployeeService {
     // 2. DTO에 담겨온 ID로 연관 엔티티(부서, 프로필 이미지) 조회
     Department department = validateDepartmentId(request.departmentId());
 
-    validateUniqueName(request.name());
-    validateUniqueEmail(request.email());
+    if(!employee.getName().equals(request.name())) {
+      validateUniqueName(request.name());
+    }
+
+    if(!employee.getEmail().equals(request.email())) {
+      validateUniqueEmail(request.email());
+    }
 
     File profileImage = profileResponse == null
         ? null

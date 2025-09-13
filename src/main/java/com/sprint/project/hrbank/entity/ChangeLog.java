@@ -37,7 +37,7 @@ public class ChangeLog {
   @Column(length = 500)
   private String memo;
 
-  @Column(nullable = false, columnDefinition = "inet")
+  @Column(length = 50, nullable = false)
   private String ipAddress;
 
   @Column(nullable = false)

@@ -31,6 +31,14 @@ public class SearchRequestNormalizer {
     return allowed.contains(v) ? v : def;
   }
 
+  // sortField 화이트리스트 검사: String과 달리 trim, toLowerCase 생략
+  public static String normalizeSortField(String raw, Set<String> allowed, String def) {
+    if (raw == null) {
+      return def;
+    }
+    return allowed.contains(raw) ? raw : def;
+  }
+
   // sortDirection: asc/desc만 허용, 소문자로 표준화
   public static String normalizeSortDirection(String raw, String def) {
     if (raw == null) {

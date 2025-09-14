@@ -2,7 +2,7 @@ package com.sprint.project.hrbank.dto.department;
 
 import static com.sprint.project.hrbank.normalizer.SearchRequestNormalizer.clampSize;
 import static com.sprint.project.hrbank.normalizer.SearchRequestNormalizer.normalizeSortDirection;
-import static com.sprint.project.hrbank.normalizer.SearchRequestNormalizer.normalizeString;
+import static com.sprint.project.hrbank.normalizer.SearchRequestNormalizer.normalizeSortField;
 
 import java.util.Set;
 
@@ -19,7 +19,7 @@ public record DepartmentSearchRequest(
     Integer size = clampSize(r.size, 10, 1, 100);
 
     Set<String> allowedFields = Set.of("establishedDate", "name");
-    String sortField = normalizeString(r.sortField, allowedFields, "name");
+    String sortField = normalizeSortField(r.sortField, allowedFields, "name");
     String sortDirection = normalizeSortDirection(r.sortDirection, "asc");
 
     return new DepartmentSearchRequest(

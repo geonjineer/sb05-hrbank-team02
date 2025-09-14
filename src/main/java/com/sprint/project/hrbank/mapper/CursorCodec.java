@@ -13,7 +13,8 @@ public class CursorCodec {
 
   public String encode(Object node) {
     try {
-      return Base64.getEncoder().encodeToString(objectMapper.writeValueAsBytes(node));
+      byte[] json = objectMapper.writeValueAsBytes(node);
+      return Base64.getUrlEncoder().withoutPadding().encodeToString(json);
     } catch (Exception e) {
       throw new IllegalArgumentException("cursor encoding failed", e);
     }
@@ -21,7 +22,7 @@ public class CursorCodec {
 
   public <T> T decode(String cursor, Class<T> type) {
     try {
-      byte[] bytes = Base64.getDecoder().decode(cursor);
+      byte[] bytes = Base64.getUrlDecoder().decode(cursor);
       return objectMapper.readValue(bytes, type);
     } catch (Exception e) {
       throw new IllegalArgumentException("유효하지 않은 cursor", e);

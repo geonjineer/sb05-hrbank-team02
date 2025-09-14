@@ -191,7 +191,7 @@ public class EmployeeQueryRepositoryImpl implements EmployeeQueryRepository {
             ? LocalDate.of(1970, 1, 1)
             : LocalDate.parse(lastSortVal);
         BooleanExpression cmp = asc ? e.hireDate.gt(base) : e.hireDate.lt(base);
-        BooleanExpression eq = e.hireDate.loe(base);
+        BooleanExpression eq = e.hireDate.eq(base);
         BooleanExpression idc = asc ? e.id.gt(lastId) : e.id.lt(lastId);
         yield cmp.or(eq.and(idc));
       }

@@ -2,6 +2,7 @@ package com.sprint.project.hrbank.dto.changeLog;
 
 import static com.sprint.project.hrbank.normalizer.SearchRequestNormalizer.clampSize;
 import static com.sprint.project.hrbank.normalizer.SearchRequestNormalizer.normalizeSortDirection;
+import static com.sprint.project.hrbank.normalizer.SearchRequestNormalizer.normalizeSortField;
 import static com.sprint.project.hrbank.normalizer.SearchRequestNormalizer.normalizeString;
 
 import com.sprint.project.hrbank.entity.ChangeLogType;
@@ -37,7 +38,7 @@ public record ChangeLogSearchRequest(
     Integer size = clampSize(r.size, 10, 1, 100);
 
     Set<String> allowedFields = Set.of("at", "ipAddress");
-    String sortField = normalizeString(r.sortField, allowedFields, "at");
+    String sortField = normalizeSortField(r.sortField, allowedFields, "at");
     String sortDirection = normalizeSortDirection(r.sortDirection, "desc");
 
     return new ChangeLogSearchRequest(

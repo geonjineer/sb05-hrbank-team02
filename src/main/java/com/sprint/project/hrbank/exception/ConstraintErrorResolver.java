@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class ConstraintErrorResolver {
+
   private final ErrorMappingProperties props;
 
   public ErrorCode resolve(DataIntegrityViolationException e) {

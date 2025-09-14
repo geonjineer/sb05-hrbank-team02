@@ -73,5 +73,7 @@ public class CursorPageAssembler {
   }
 
   // 중첩 record는 원래 static이라 static 키워드 불필요
-  private record Next(String cursor, Long idAfter) {}
+  private record Next(String cursor, Long idAfter) {
+
+  }
 }

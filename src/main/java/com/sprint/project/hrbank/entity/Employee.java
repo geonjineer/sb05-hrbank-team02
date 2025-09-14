@@ -69,36 +69,30 @@ public class Employee {
     this.status = EmployeeStatus.ACTIVE;
   }
 
-  public boolean update(String name, String email, LocalDate hireDate, String position,
-      Department department,
-      File profileImage) {
-    boolean changed = false;
+  public void update(String name, String email, LocalDate hireDate,
+      EmployeeStatus status, String position, Department department, File profileImage) {
 
-    if (this.name != null && !name.equals(this.name)) {
+    if (name != null && !name.equals(this.name)) {
       this.name = name;
-      changed = true;
     }
-    if (this.email != null && !email.equals(this.email)) {
+    if (email != null && !email.equals(this.email)) {
       this.email = email;
-      changed = true;
     }
-    if (this.hireDate != null && !hireDate.equals(this.hireDate)) {
+    if (hireDate != null && !hireDate.equals(this.hireDate)) {
       this.hireDate = hireDate;
-      changed = true;
     }
-    if (this.position != null && !position.equals(this.position)) {
+    if (status != null && !status.equals(this.status)) {
+      this.status = status;
+    }
+    if (position != null && !position.equals(this.position)) {
       this.position = position;
-      changed = true;
     }
-    if (this.department != department) {
+    if (department != null && !department.equals(this.department)) {
       this.department = department;
-      changed = true;
     }
-    if (this.profileImage != profileImage) {
+    if (profileImage != null && !profileImage.equals(this.profileImage)) {
       this.profileImage = profileImage;
-      changed = true;
     }
 
-    return changed;
   }
 }

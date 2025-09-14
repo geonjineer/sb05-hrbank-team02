@@ -14,6 +14,8 @@ public class HrbankApplication {
 
   public static void main(String[] args) {
     SpringApplication.run(HrbankApplication.class, args);
+    System.out.println("localhost: http://localhost:8080/");
+    System.out.println("swagger: http://localhost:8080/swagger-ui.html");
   }
 
 }

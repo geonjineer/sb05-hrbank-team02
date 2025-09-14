@@ -11,6 +11,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Setter
 @ConfigurationProperties(prefix = "app.error")
 public class ErrorMappingProperties {
+
   private Map<String, ErrorCode> constraintMap = new HashMap<>();
   private Map<String, ErrorCode> sqlstateMap = new HashMap<>();
   private ErrorCode defaultCode = ErrorCode.INTERNAL_ERROR;

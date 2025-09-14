@@ -9,7 +9,7 @@ import org.springframework.format.annotation.DateTimeFormat.ISO;
 
 public record DepartmentUpdateRequest(
     @NotBlank(message = "DEPARTMENT_NAME_REQUIRED")
-    @Size(max =100, message = "DEPARTMENT_NAME_TOO_LONG")
+    @Size(max = 100, message = "DEPARTMENT_NAME_TOO_LONG")
     String name,
 
     @Size(max = 1000, message = "DEPARTMENT_DESCRIPTION_TOO_LONG")

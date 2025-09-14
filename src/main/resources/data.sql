@@ -84,14 +84,3 @@ INSERT INTO change_logs (type, employee_number, memo,
       '192.168.1.106', '2022-03-01 11:00:00+09'),
      ('UPDATED', '00000002', '이메일 변경',
       '192.168.1.107', '2022-05-10 09:20:00+09');
-
--- 앞서 INSERT한 change_logs 데이터(ID: 4, 5, 6)에 대한 상세 내역을 추가합니다.
-INSERT INTO change_log_diffs (property_name, before_value, after_value, change_log_id) VALUES
--- change_log_id=4 (부서 이동)에 대한 내역
-('department', '"기획팀"', '"개발팀"', 4),
-
--- change_log_id=5 (직급 승진)에 대한 내역
-('position', '"사원"', '"대리"', 5),
-
--- change_log_id=6 (이메일 변경)에 대한 내역
-('email', '"kim02@example.com"', '"kim.new@example.com"', 6);

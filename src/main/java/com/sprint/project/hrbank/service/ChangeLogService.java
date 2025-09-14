@@ -39,8 +39,8 @@ public class ChangeLogService {
   public ChangeLogDto create(ChangeLogCreateRequest request) {
     ChangeLog changeLog = new ChangeLog(
         request.type(),
-        request.memo(),
         request.employeeNumber(),
+        request.memo(),
         request.ipAddress(),
         request.at()
     );
@@ -65,7 +65,7 @@ public class ChangeLogService {
 
     int size = request.size();
     String sortField = request.sortField();
-    boolean desc = !"asc".equalsIgnoreCase(request.sortDirection());
+    boolean asc = !"desc".equalsIgnoreCase(request.sortDirection());
 
     String lastSortValue = null;
     Long lastId = null;
@@ -88,7 +88,7 @@ public class ChangeLogService {
     }
 
     List<ChangeLogDto> content = changeLogRepository.search(request, size + 1,
-            sortField, desc,
+            sortField, asc,
             lastSortValue, lastId).stream()
         .map(changeLogMapper::toDto)
         .toList();

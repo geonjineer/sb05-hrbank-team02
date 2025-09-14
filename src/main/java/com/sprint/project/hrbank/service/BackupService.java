@@ -10,13 +10,6 @@ import com.sprint.project.hrbank.repository.BackupRepository;
 import com.sprint.project.hrbank.repository.ChangeLogRepository;
 import com.sprint.project.hrbank.repository.EmployeeRepository;
 import jakarta.persistence.EntityManager;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -25,6 +18,12 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -40,6 +39,7 @@ public class BackupService {
 
   /**
    * 스케줄러/수동 공용 진입점
+   *
    * @param operator 요청자 IP 또는 "system"
    */
   @Transactional
@@ -101,7 +101,12 @@ public class BackupService {
     } catch (Exception e) {
       log.error("Backup failed", e);
       // 실패 시 임시 파일 삭제 시도
-      try { if (tempCsv != null) Files.deleteIfExists(tempCsv); } catch (IOException ignore) {}
+      try {
+        if (tempCsv != null) {
+          Files.deleteIfExists(tempCsv);
+        }
+      } catch (IOException ignore) {
+      }
 
       // 에러 로그 저장 (STEP.4-2)
       try {
@@ -123,10 +128,13 @@ public class BackupService {
     }
   }
 
-  /** 직원 전체를 CSV로 출력(페이지 처리) */
+  /**
+   * 직원 전체를 CSV로 출력(페이지 처리)
+   */
   private void writeEmployeesCsv(Path csv) throws IOException {
     try (BufferedWriter bw = Files.newBufferedWriter(csv)) {
-      bw.write("id,employee_number,name,email,department,position,hire_date,status,profile_image_id");
+      bw.write(
+          "id,employee_number,name,email,department,position,hire_date,status,profile_image_id");
       bw.newLine();
 
       int page = 0;
@@ -148,19 +156,27 @@ public class BackupService {
           ));
           bw.newLine();
         }
-        if (!slice.hasNext()) break;
+        if (!slice.hasNext()) {
+          break;
+        }
         page++;
       }
       bw.flush();
     }
   }
 
-  private String safe(Object o) { return o == null ? "" : String.valueOf(o); }
+  private String safe(Object o) {
+    return o == null ? "" : String.valueOf(o);
+  }
 
   private String csvEscape(String s) {
-    if (s == null) return "";
+    if (s == null) {
+      return "";
+    }
     boolean needQuote = s.contains(",") || s.contains("\"") || s.contains("\n") || s.contains("\r");
-    if (!needQuote) return s;
+    if (!needQuote) {
+      return s;
+    }
     return "\"" + s.replace("\"", "\"\"") + "\"";
   }
 }

@@ -2,7 +2,7 @@ package com.sprint.project.hrbank.dto.employee;
 
 import static com.sprint.project.hrbank.normalizer.SearchRequestNormalizer.clampSize;
 import static com.sprint.project.hrbank.normalizer.SearchRequestNormalizer.normalizeSortDirection;
-import static com.sprint.project.hrbank.normalizer.SearchRequestNormalizer.normalizeString;
+import static com.sprint.project.hrbank.normalizer.SearchRequestNormalizer.normalizeSortField;
 
 import com.sprint.project.hrbank.entity.EmployeeStatus;
 import com.sprint.project.hrbank.validation.DateRange;
@@ -35,11 +35,11 @@ public record EmployeeSearchRequest(
 ) {
 
   public static EmployeeSearchRequest of(EmployeeSearchRequest r) {
-    Integer size = clampSize(r.size, 10, 1, 100);
+    Integer size = clampSize(r.size(), 10, 1, 100);
 
     Set<String> allowedFields = Set.of("name", "hireDate", "employeeNumber");
-    String sortField = normalizeString(r.sortField, allowedFields, "name");
-    String sortDirection = normalizeSortDirection(r.sortDirection, "asc");
+    String sortField = normalizeSortField(r.sortField(), allowedFields, "name");
+    String sortDirection = normalizeSortDirection(r.sortDirection(), "asc");
 
     return new EmployeeSearchRequest(
         r.nameOrEmail(),

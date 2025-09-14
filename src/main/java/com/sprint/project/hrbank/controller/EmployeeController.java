@@ -1,5 +1,6 @@
 package com.sprint.project.hrbank.controller;
 
+import com.sprint.project.hrbank.converter.ClientIpResolver;
 import com.sprint.project.hrbank.dto.common.CursorPageResponse;
 import com.sprint.project.hrbank.dto.employee.EmployeeCountSearchRequest;
 import com.sprint.project.hrbank.dto.employee.EmployeeCreateRequest;
@@ -25,9 +26,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -44,16 +45,18 @@ public class EmployeeController {
 
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<EmployeeDto> create(
-      @RequestPart @Valid EmployeeCreateRequest request,
+      @RequestPart(name = "employee") @Valid EmployeeCreateRequest request,
       @RequestPart(required = false) MultipartFile profile,
       HttpServletRequest httpRequest) {
     FileResponse fileResponse = profile == null
         ? null
         : fileService.upload(profile);
 
+    String clientIp = ClientIpResolver.resolve(httpRequest);
+
     return ResponseEntity
         .status(HttpStatus.CREATED)
-        .body(employeeService.createWithLog(request, fileResponse, httpRequest.getRemoteAddr()));
+        .body(employeeService.createWithLog(request, fileResponse, clientIp));
   }
 
   @GetMapping("/{id}")
@@ -70,7 +73,7 @@ public class EmployeeController {
   }
 
   @GetMapping("/stats/trend")
-  public ResponseEntity<EmployeeTrendDto> findTrend(
+  public ResponseEntity<List<EmployeeTrendDto>> findTrend(
       @ModelAttribute @Valid EmployeeTrendSearchRequest request) {
     EmployeeTrendSearchRequest filtered = EmployeeTrendSearchRequest.of(request);
     return ResponseEntity.ok(employeeStatsService.getEmployeeTrend(filtered));
@@ -91,19 +94,20 @@ public class EmployeeController {
     return ResponseEntity.ok(employeeStatsService.getEmployeeCount(filtered));
   }
 
-  @PutMapping("/{id}")
+  @PatchMapping("/{id}")
   public ResponseEntity<EmployeeDto> update(
       @PathVariable @Positive(message = "ENTITY_ID_MIN") Long id,
-      @RequestPart @Valid EmployeeUpdateRequest request,
+      @RequestPart(name = "employee") @Valid EmployeeUpdateRequest request,
       @RequestPart(required = false) MultipartFile profile,
       HttpServletRequest httpRequest
   ) {
     FileResponse fileResponse = profile == null
         ? null
         : fileService.upload(profile);
+    String clientIp = ClientIpResolver.resolve(httpRequest);
 
     return ResponseEntity.ok(
-        employeeService.updateWithLog(id, request, fileResponse, httpRequest.getRemoteAddr()));
+        employeeService.updateWithLog(id, request, fileResponse, clientIp));
   }
 
   @DeleteMapping("/{id}")

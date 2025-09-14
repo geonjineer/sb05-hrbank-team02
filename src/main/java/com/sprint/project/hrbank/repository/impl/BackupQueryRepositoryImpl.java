@@ -62,7 +62,7 @@ public class BackupQueryRepositoryImpl implements BackupQueryRepository {
     }
 
     OrderSpecifier<?> primary = buildPrimaryOrder(sortField, asc);
-    OrderSpecifier<Long> tie   = asc ? backup.id.asc() : backup.id.desc();
+    OrderSpecifier<Long> tie = asc ? backup.id.asc() : backup.id.desc();
 
     return queryFactory
         .selectFrom(backup)
@@ -74,9 +74,9 @@ public class BackupQueryRepositoryImpl implements BackupQueryRepository {
 
   private OrderSpecifier<?> buildPrimaryOrder(String sortField, boolean asc) {
     return switch (sortField) {
-      case "endedAt"  -> asc ? backup.endedAt.asc()  : backup.endedAt.desc();
-      case "status"   -> asc ? backup.status.asc()   : backup.status.desc();
-      default         -> asc ? backup.startedAt.asc(): backup.startedAt.desc();
+      case "endedAt" -> asc ? backup.endedAt.asc() : backup.endedAt.desc();
+      case "status" -> asc ? backup.status.asc() : backup.status.desc();
+      default -> asc ? backup.startedAt.asc() : backup.startedAt.desc();
     };
   }
 
@@ -98,7 +98,7 @@ public class BackupQueryRepositoryImpl implements BackupQueryRepository {
         BooleanExpression keyCmp = asc
             ? Expressions.booleanTemplate("{0} > {1}", backup.endedAt, base)
             : Expressions.booleanTemplate("{0} < {1}", backup.endedAt, base);
-        BooleanExpression keyEq  =
+        BooleanExpression keyEq =
             Expressions.booleanTemplate("{0} = {1}", backup.endedAt, base);
         yield keyCmp.or(keyEq.and(idCmp));
       }
@@ -108,7 +108,7 @@ public class BackupQueryRepositoryImpl implements BackupQueryRepository {
         BooleanExpression keyCmp = asc
             ? backup.status.stringValue().gt(base)
             : backup.status.stringValue().lt(base);
-        BooleanExpression keyEq  = backup.status.stringValue().eq(base);
+        BooleanExpression keyEq = backup.status.stringValue().eq(base);
         yield keyCmp.or(keyEq.and(idCmp));
       }
       default -> { // startedAt
@@ -116,7 +116,7 @@ public class BackupQueryRepositoryImpl implements BackupQueryRepository {
         BooleanExpression keyCmp = asc
             ? Expressions.booleanTemplate("{0} > {1}", backup.startedAt, base)
             : Expressions.booleanTemplate("{0} < {1}", backup.startedAt, base);
-        BooleanExpression keyEq  =
+        BooleanExpression keyEq =
             Expressions.booleanTemplate("{0} = {1}", backup.startedAt, base);
         yield keyCmp.or(keyEq.and(idCmp));
       }
@@ -126,7 +126,9 @@ public class BackupQueryRepositoryImpl implements BackupQueryRepository {
   // 문자열 → Instant 파싱 실패시 극값으로 보정
   private Instant parseInstantOrLimit(String s, boolean asc) {
     try {
-      if (s == null || s.isBlank()) return asc ? Instant.MIN : Instant.MAX;
+      if (s == null || s.isBlank()) {
+        return asc ? Instant.MIN : Instant.MAX;
+      }
       return Instant.parse(s);
     } catch (Exception ignore) {
       return asc ? Instant.MIN : Instant.MAX;
@@ -135,14 +137,26 @@ public class BackupQueryRepositoryImpl implements BackupQueryRepository {
 
   // LocalDateTime/LocalDate/OffsetDateTime 등을 UTC Instant로 변환
   private Instant toInstantUtc(Object temporal) {
-    if (temporal instanceof Instant i) return i;
-    if (temporal instanceof java.time.OffsetDateTime odt) return odt.toInstant();
-    if (temporal instanceof java.time.ZonedDateTime zdt) return zdt.toInstant();
-    if (temporal instanceof LocalDateTime ldt) return ldt.toInstant(ZoneOffset.UTC);
-    if (temporal instanceof java.time.LocalDate ld) return ld.atStartOfDay().toInstant(ZoneOffset.UTC);
+    if (temporal instanceof Instant i) {
+      return i;
+    }
+    if (temporal instanceof java.time.OffsetDateTime odt) {
+      return odt.toInstant();
+    }
+    if (temporal instanceof java.time.ZonedDateTime zdt) {
+      return zdt.toInstant();
+    }
+    if (temporal instanceof LocalDateTime ldt) {
+      return ldt.toInstant(ZoneOffset.UTC);
+    }
+    if (temporal instanceof java.time.LocalDate ld) {
+      return ld.atStartOfDay().toInstant(ZoneOffset.UTC);
+    }
     // 그 외에는 그대로 now/혹은 예외 처리 – 여기선 안전하게 now로 보정
     return Instant.now();
   }
 
-  private static boolean hasText(String s) { return s != null && !s.isBlank(); }
+  private static boolean hasText(String s) {
+    return s != null && !s.isBlank();
+  }
 }

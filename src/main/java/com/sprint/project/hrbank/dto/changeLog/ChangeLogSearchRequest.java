@@ -1,5 +1,9 @@
 package com.sprint.project.hrbank.dto.changeLog;
 
+import static com.sprint.project.hrbank.normalizer.SearchRequestNormalizer.clampSize;
+import static com.sprint.project.hrbank.normalizer.SearchRequestNormalizer.normalizeSortDirection;
+import static com.sprint.project.hrbank.normalizer.SearchRequestNormalizer.normalizeSortField;
+
 import com.sprint.project.hrbank.entity.ChangeLogType;
 import com.sprint.project.hrbank.validation.DateRange;
 import jakarta.validation.constraints.PastOrPresent;
@@ -7,7 +11,6 @@ import java.time.Instant;
 import java.util.Set;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
-import static com.sprint.project.hrbank.normalizer.SearchRequestNormalizer.*;
 
 @DateRange(from = "atFrom", to = "atTo")
 public record ChangeLogSearchRequest(
@@ -34,7 +37,7 @@ public record ChangeLogSearchRequest(
     Integer size = clampSize(r.size, 10, 1, 100);
 
     Set<String> allowedFields = Set.of("at", "ipAddress");
-    String sortField = normalizeString(r.sortField, allowedFields, "at");
+    String sortField = normalizeSortField(r.sortField, allowedFields, "at");
     String sortDirection = normalizeSortDirection(r.sortDirection, "desc");
 
     return new ChangeLogSearchRequest(

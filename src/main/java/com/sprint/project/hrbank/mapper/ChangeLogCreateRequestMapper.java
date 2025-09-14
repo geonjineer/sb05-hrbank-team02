@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ChangeLogCreateRequestMapper {
 
-  ObjectMapper objectMapper = new ObjectMapper();
+  private final ObjectMapper objectMapper;
 
   public ChangeLogCreateRequest forCreate(EmployeeDto after, String memo, String ip) {
     return ChangeLogCreateRequest.builder()
@@ -66,7 +66,7 @@ public class ChangeLogCreateRequestMapper {
     return ChangeLogCreateRequest.builder()
         .type(ChangeLogType.DELETED)
         .employeeNumber(before.employeeNumber())
-        .memo(null)
+        .memo("직원 삭제")
         .ipAddress(ip)
         .diffs(List.of(
             diff("name", before.name(), null),

@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS "change_logs"
     "type"            VARCHAR(10)  NOT NULL CHECK (type IN ('CREATED', 'UPDATED', 'DELETED')),
     "employee_number" VARCHAR(100) NOT NULL,
     "memo"            VARCHAR(500) NULL,
-    "ip_address"      inet         NOT NULL,
+    "ip_address"      VARCHAR(50)         NOT NULL,
     "at"              timestamptz  NOT NULL DEFAULT NOW()
 );
 

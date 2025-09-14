@@ -8,6 +8,7 @@ plugins {
 
 test {
     useJUnitPlatform()                         // JUnit5라면 필수
+    systemProperty "spring.profiles.active", "test"
     finalizedBy jacocoTestReport               // 테스트 후 리포트 자동 생성
 }
 jacoco {
@@ -28,7 +29,6 @@ jacocoTestReport {
 
 sonarqube {
     properties {
-        // ✅ JaCoCo XML 리포트 경로 알려주기
         property "sonar.coverage.jacoco.xmlReportPaths",
                 layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml").get().asFile.path
         // (선택) 생성코드/빌드 산출물 제외
@@ -40,10 +40,12 @@ group = 'com.sprint.project'
 version = '0.0.1-SNAPSHOT'
 description = 'hrbank'
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-    }
+bootJar {
+    archiveFileName = "app.jar"
+}
+
+jar {
+    enabled = false
 }
 
 configurations {

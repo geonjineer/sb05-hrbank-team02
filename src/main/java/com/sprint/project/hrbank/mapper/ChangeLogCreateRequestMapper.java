@@ -66,7 +66,7 @@ public class ChangeLogCreateRequestMapper {
     return ChangeLogCreateRequest.builder()
         .type(ChangeLogType.DELETED)
         .employeeNumber(before.employeeNumber())
-        .memo(null)
+        .memo("직원 삭제")
         .ipAddress(ip)
         .diffs(List.of(
             diff("name", before.name(), null),

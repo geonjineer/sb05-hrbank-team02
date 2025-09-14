@@ -58,7 +58,9 @@ public class SearchRequestNormalizer {
     return (raw == null) ? def : raw;
   }
 
-  /** 단위의 '끝'에 정렬 (day=그날, week=ISO 일요일, month=말일, quarter=분기말, year=연말) */
+  /**
+   * 단위의 '끝'에 정렬 (day=그날, week=ISO 일요일, month=말일, quarter=분기말, year=연말)
+   */
   public static LocalDate alignToUnitEnd(LocalDate date, String unit) {
     return switch (unit) {
       case "day" -> date;
@@ -75,7 +77,9 @@ public class SearchRequestNormalizer {
     };
   }
 
-  /** 버킷 개수 계산 시 역방향 이동(단위 끝 기준) - 11이면 총 12버킷 */
+  /**
+   * 버킷 개수 계산 시 역방향 이동(단위 끝 기준) - 11이면 총 12버킷
+   */
   public static LocalDate subtractUnits(LocalDate unitEnd, String unit, int n) {
     return switch (unit) {
       case "day" -> unitEnd.minusDays(n);

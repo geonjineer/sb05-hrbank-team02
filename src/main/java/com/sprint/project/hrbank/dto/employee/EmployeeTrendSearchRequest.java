@@ -32,7 +32,7 @@ public record EmployeeTrendSearchRequest(
     LocalDate alignedTo = alignToUnitEnd(to, unit);
     LocalDate defaultFrom = subtractUnits(alignedTo, unit, 11); // 총 11개 버킷
 
-    LocalDate from = r.from() != null ? r. from() : defaultFrom;
+    LocalDate from = r.from() != null ? r.from() : defaultFrom;
 
     return new EmployeeTrendSearchRequest(from, alignedTo, unit);
   }

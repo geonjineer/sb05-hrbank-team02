@@ -3,7 +3,6 @@ package com.sprint.project.hrbank.dto.changeLog;
 import static com.sprint.project.hrbank.normalizer.SearchRequestNormalizer.clampSize;
 import static com.sprint.project.hrbank.normalizer.SearchRequestNormalizer.normalizeSortDirection;
 import static com.sprint.project.hrbank.normalizer.SearchRequestNormalizer.normalizeSortField;
-import static com.sprint.project.hrbank.normalizer.SearchRequestNormalizer.normalizeString;
 
 import com.sprint.project.hrbank.entity.ChangeLogType;
 import com.sprint.project.hrbank.validation.DateRange;

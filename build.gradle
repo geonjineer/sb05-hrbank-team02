@@ -2,7 +2,38 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.5'
     id 'io.spring.dependency-management' version '1.1.7'
-    id "org.sonarqube" version "6.3.1.5724"
+    id 'org.sonarqube' version '6.3.1.5724'
+    id 'jacoco'
+}
+
+test {
+    useJUnitPlatform()                         // JUnit5라면 필수
+    finalizedBy jacocoTestReport               // 테스트 후 리포트 자동 생성
+}
+jacoco {
+    toolVersion = "0.8.11"                     // 선택(안 써도 기본 동작)
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true                      // ✅ Sonar가 읽는 건 XML
+        html.required = true                     // 브라우저로 상세보고 보려면 유용
+    }
+    // (선택) 생성/매핑코드, Q클래스 제외 예시
+    classDirectories.setFrom(files(classDirectories.files.collect {
+        fileTree(dir: it, exclude: ["**/Q**.class", "**/*\$*Mapper*.class"])
+    }))
+}
+
+sonarqube {
+    properties {
+        // ✅ JaCoCo XML 리포트 경로 알려주기
+        property "sonar.coverage.jacoco.xmlReportPaths",
+                layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml").get().asFile.path
+        // (선택) 생성코드/빌드 산출물 제외
+        property "sonar.exclusions", "**/generated/**, **/Q**.java, **/build/**"
+    }
 }
 
 group = 'com.sprint.project'

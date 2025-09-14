@@ -40,18 +40,16 @@ group = 'com.sprint.project'
 version = '0.0.1-SNAPSHOT'
 description = 'hrbank'
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
-    }
-}
-
 bootJar {
     archiveFileName = "app.jar"
 }
 
 jar {
     enabled = false
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
 configurations {

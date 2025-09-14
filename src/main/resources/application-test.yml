@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/hrbank
+    username: hrbank_user
+    password: hrbank1234
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+# 테스트에선 시끄러운 로그/스케줄러 OFF
+logging:
+  level:
+    org.springframework: warn
+    org.hibernate: warn

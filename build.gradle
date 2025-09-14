@@ -47,10 +47,29 @@ bootJar {
 jar {
     enabled = false
 }
+
+def JV = JavaLanguageVersion.of(21)
+
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JV
     }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    // 어떤 플러그인이 17을 요구하더라도 21 컴파일러를 강제
+    javaCompiler = javaToolchains.compilerFor { languageVersion = JV }
+    // 만약 바이너리 타겟을 17로 유지하고 싶으면(선택)
+    // options.release = 17
+}
+
+tasks.withType(Test).configureEach {
+    // 테스트 런처도 21로
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JV }
+}
+
+tasks.withType(Javadoc).configureEach {
+    javadocTool = javaToolchains.javadocToolFor { languageVersion = JV }
 }
 
 configurations {

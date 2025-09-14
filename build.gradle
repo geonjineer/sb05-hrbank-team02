@@ -48,7 +48,7 @@ jar {
     enabled = false
 }
 
-def JV = JavaLanguageVersion.of(21)
+def JV = JavaLanguageVersion.of(17)
 
 java {
     toolchain {

@@ -1,8 +1,9 @@
 package com.sprint.project.hrbank.dto.employee;
 
-import static com.sprint.project.hrbank.normalizer.SearchRequestNormalizer.calculateFromUnit;
+import static com.sprint.project.hrbank.normalizer.SearchRequestNormalizer.alignToUnitEnd;
 import static com.sprint.project.hrbank.normalizer.SearchRequestNormalizer.defaultLocalDate;
 import static com.sprint.project.hrbank.normalizer.SearchRequestNormalizer.normalizeString;
+import static com.sprint.project.hrbank.normalizer.SearchRequestNormalizer.subtractUnits;
 
 import com.sprint.project.hrbank.validation.DateRange;
 import jakarta.validation.constraints.PastOrPresent;
@@ -27,9 +28,13 @@ public record EmployeeTrendSearchRequest(
     Set<String> allowedUnit = Set.of("day", "week", "month", "quarter", "year");
     String unit = normalizeString(r.unit(), allowedUnit, "month");
     LocalDate to = defaultLocalDate(r.to(), LocalDate.now());
-    LocalDate from = calculateFromUnit(to, unit, 12);
 
-    return new EmployeeTrendSearchRequest(from, to, unit);
+    LocalDate alignedTo = alignToUnitEnd(to, unit);
+    LocalDate defaultFrom = subtractUnits(alignedTo, unit, 11); // 총 11개 버킷
+
+    LocalDate from = r.from() != null ? r. from() : defaultFrom;
+
+    return new EmployeeTrendSearchRequest(from, alignedTo, unit);
   }
 
 }

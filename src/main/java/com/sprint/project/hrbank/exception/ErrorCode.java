@@ -41,6 +41,7 @@ public enum ErrorCode {
   CHANGE_LOG_NOT_FOUND(HttpStatus.NOT_FOUND),
 
   // ===== Common =====
+  UNSUPPORTED_UNIT,
   DATE_RANGE_INVALID,
   DATE_REQUIRED,
   DATE_PAST_OR_PRESENT,

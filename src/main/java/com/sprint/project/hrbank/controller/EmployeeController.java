@@ -73,7 +73,7 @@ public class EmployeeController {
   }
 
   @GetMapping("/stats/trend")
-  public ResponseEntity<EmployeeTrendDto> findTrend(
+  public ResponseEntity<List<EmployeeTrendDto>> findTrend(
       @ModelAttribute @Valid EmployeeTrendSearchRequest request) {
     EmployeeTrendSearchRequest filtered = EmployeeTrendSearchRequest.of(request);
     return ResponseEntity.ok(employeeStatsService.getEmployeeTrend(filtered));

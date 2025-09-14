@@ -166,6 +166,7 @@ public class EmployeeService {
         request.name(),
         request.email(),
         request.hireDate(),
+        request.status(),
         request.position(),
         department,
         profileImage

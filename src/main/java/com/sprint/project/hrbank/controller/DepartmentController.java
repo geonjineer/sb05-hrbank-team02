@@ -6,6 +6,8 @@ import com.sprint.project.hrbank.dto.department.DepartmentDto;
 import com.sprint.project.hrbank.dto.department.DepartmentSearchRequest;
 import com.sprint.project.hrbank.dto.department.DepartmentUpdateRequest;
 import com.sprint.project.hrbank.service.DepartmentService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
@@ -24,10 +26,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/departments")
+@Tag(name = "부서 관리", description = "부서 관리 API")
 public class DepartmentController {
 
   private final DepartmentService departmentService;
 
+  @Operation(summary = "부서 등록")
   @PostMapping
   public ResponseEntity<DepartmentDto> create(
       @RequestBody @Valid DepartmentCreateRequest req) {
@@ -38,6 +42,7 @@ public class DepartmentController {
         .body(created);
   }
 
+  @Operation(summary = "부서 목록 조회")
   @GetMapping
   public CursorPageResponse<DepartmentDto> findAll(
       @ModelAttribute DepartmentSearchRequest request) {
@@ -46,6 +51,7 @@ public class DepartmentController {
     return departmentService.findAll(filtered);
   }
 
+  @Operation(summary = "부서 상세 조회")
   @GetMapping("/{id}")
   public ResponseEntity<DepartmentDto> findById(
       @PathVariable @Positive(message = "ENTITY_ID_MIN") Long id) {
@@ -55,6 +61,7 @@ public class DepartmentController {
         .body(department);
   }
 
+  @Operation(summary = "부서 수정")
   @PatchMapping("/{id}")
   public ResponseEntity<DepartmentDto> update(
       @PathVariable @Positive(message = "ENTITY_ID_MIN") Long id,
@@ -63,6 +70,7 @@ public class DepartmentController {
         ResponseEntity.ok().body(departmentService.update(id, request));
   }
 
+  @Operation(summary = "부서 삭제")
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> delete(
       @PathVariable @Positive(message = "ENTITY_ID_MIN") Long id) {

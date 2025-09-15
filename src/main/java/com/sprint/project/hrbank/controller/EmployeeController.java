@@ -15,6 +15,8 @@ import com.sprint.project.hrbank.dto.file.FileResponse;
 import com.sprint.project.hrbank.service.EmployeeService;
 import com.sprint.project.hrbank.service.EmployeeStatsService;
 import com.sprint.project.hrbank.service.FileService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -37,12 +39,14 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/employees")
+@Tag(name = "직원 관리", description = "직원 관리 API")
 public class EmployeeController {
 
   private final EmployeeService employeeService;
   private final EmployeeStatsService employeeStatsService;
   private final FileService fileService;
 
+  @Operation(summary = "직원 등록")
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<EmployeeDto> create(
       @RequestPart(name = "employee") @Valid EmployeeCreateRequest request,
@@ -59,12 +63,14 @@ public class EmployeeController {
         .body(employeeService.createWithLog(request, fileResponse, clientIp));
   }
 
+  @Operation(summary = "직원 상세 조회")
   @GetMapping("/{id}")
   public ResponseEntity<EmployeeDto> findById(
       @PathVariable @Positive(message = "ENTITY_ID_MIN") Long id) {
     return ResponseEntity.ok().body(employeeService.findById(id));
   }
 
+  @Operation(summary = "직원 목록 조회")
   @GetMapping
   public CursorPageResponse<EmployeeDto> findAll(
       @ModelAttribute @Valid EmployeeSearchRequest request) {
@@ -72,6 +78,7 @@ public class EmployeeController {
     return employeeService.find(filtered);
   }
 
+  @Operation(summary = "직원 수 추이 조회")
   @GetMapping("/stats/trend")
   public ResponseEntity<List<EmployeeTrendDto>> findTrend(
       @ModelAttribute @Valid EmployeeTrendSearchRequest request) {
@@ -79,6 +86,7 @@ public class EmployeeController {
     return ResponseEntity.ok(employeeStatsService.getEmployeeTrend(filtered));
   }
 
+  @Operation(summary = "직원 분포 조회")
   @GetMapping("/stats/distribution")
   public ResponseEntity<List<EmployeeDistributionDto>> findDistribution(
       @ModelAttribute EmployeeDistributionSearchRequest request) {
@@ -86,6 +94,7 @@ public class EmployeeController {
     return ResponseEntity.ok(employeeStatsService.getEmployeeDistribution(filtered));
   }
 
+  @Operation(summary = "직원 수 조회")
   @GetMapping("/count")
   public ResponseEntity<Long> getEmployeeCount(
       @ModelAttribute @Valid EmployeeCountSearchRequest request
@@ -94,6 +103,7 @@ public class EmployeeController {
     return ResponseEntity.ok(employeeStatsService.getEmployeeCount(filtered));
   }
 
+  @Operation(summary = "직원 수정")
   @PatchMapping("/{id}")
   public ResponseEntity<EmployeeDto> update(
       @PathVariable @Positive(message = "ENTITY_ID_MIN") Long id,
@@ -110,6 +120,7 @@ public class EmployeeController {
         employeeService.updateWithLog(id, request, fileResponse, clientIp));
   }
 
+  @Operation(summary = "직원 삭제")
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> delete(
       @PathVariable @Positive(message = "ENTITY_ID_MIN") Long id,

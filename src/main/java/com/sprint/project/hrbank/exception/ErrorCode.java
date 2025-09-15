@@ -61,12 +61,16 @@ public enum ErrorCode {
   FILE_META_NOT_FOUND,           // 파일 메타 없음
   FILE_NOT_FOUND_ON_DISK,        // 디스크에 파일 없음
   FILE_STORAGE_IO_ERROR,         // 디스크 I/O 실패(저장/이동/삭제)
+  FILE_NOT_FOUND,
+  FILE_STORAGE_WRITE_FAILED,
 
   // 백업
   BACKUP_NOT_NEEDED,             // 변경 없음 → 스킵(실패 아님, 200/202 흐름)
   BACKUP_IN_PROGRESS_CONFLICT,   // 동시에 실행 요청 등
   BACKUP_LATEST_NOT_FOUND,       // 최신 백업 없음(조회 API에서 사용)
-  BACKUP_LOG_WRITE_FAILED;        // 실패 처리 중 .log 저장 실패
+  BACKUP_LOG_WRITE_FAILED,        // 실패 처리 중 .log 저장 실패
+
+  INVALID_ARGUMENT;
 
   @Getter
   private final HttpStatus status;

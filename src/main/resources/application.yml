@@ -1,4 +1,6 @@
 spring:
+  profiles:
+    default: test
   application:
     name: hrbank
 
@@ -7,49 +9,33 @@ spring:
       max-file-size: 10MB
       max-request-size: 30MB
 
-  datasource:
-    url: jdbc:postgresql://localhost:5432/hrbank
-    username: hrbank_user
-    password: hrbank1234
-    driver-class-name: org.postgresql.Driver
   jackson:
     time-zone: UTC
     serialization:
       write-dates-as-timestamps: false
 
-  # JPA
   jpa:
-    hibernate:
-      ddl-auto: validate # create | create-drop | update | validate | none
-    show-sql: true
+    open-in-view: false
     properties:
       hibernate:
         format_sql: true
         highlight_sql: true
         use_sql_comments: true
-        dialect: org.hibernate.dialect.PostgreSQLDialect
         physical_naming_strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
         jdbc.time_zone: UTC
-        jdbc.batch_size: 100       # [추가] batch insert/update 시 한번에 100개씩 처리 → 대량 작업 성능 향상
-        order_inserts: true        # [추가] insert문을 같은 엔티티 기준으로 모아 순서 보장 → DB 성능 최적화
-        order_updates: true        # [추가] update문도 순서 정렬 → 락 경합 줄임
-    open-in-view: false
-
-  # ErrorMessage
-  messages:
-    basename: messages
-    encoding: UTF-8
-    fallback-to-system-locale: false
+        jdbc.batch_size: 100
+        order_inserts: true
+        order_updates: true
 
 springdoc:
   api-docs:
-    enabled: true          # API 스펙 JSON 활성화
-    path: /api-docs        # 스펙 JSON 기본 경로
+    enabled: true
+    path: /api-docs
   swagger-ui:
-    enabled: true          # Swagger UI 사용 여부
-    path: /swagger-ui.html # Swagger UI 접속 경로
-    display-request-duration: true   # 요청 소요 시간 표시
-    persist-authorization: true      # 새로고침해도 토큰 유지
+    enabled: true
+    path: /swagger-ui.html
+    display-request-duration: true
+    persist-authorization: true
 
 app:
   error:
@@ -57,9 +43,9 @@ app:
       uk_employees_email: EMPLOYEE_EMAIL_DUPLICATE
       uk_employees_name:  EMPLOYEE_NAME_DUPLICATE
     sqlstate-map:
-      '23505': DUPLICATE_KEY     # unique_violation
-      '23503': FK_VIOLATION      # foreign_key_violation
-      '23514': CHECK_VIOLATION   # check_violation
+      '23505': DUPLICATE_KEY
+      '23503': FK_VIOLATION
+      '23514': CHECK_VIOLATION
     default-code: INTERNAL_ERROR
 
 server:
@@ -71,25 +57,20 @@ server:
       internal-proxies: 10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|127\.0\.0\.1
     max-swallow-size: -1
     # [추가] 업로드 제한 무시(-1) → 대용량 파일 업로드 시 Tomcat이 요청 버퍼를 삼키지 않고 그대로 전달
+  port: ${PORT:8080}
 
-
-# log
 logging:
   level:
-    # Hibernate SQL
     org.hibernate.SQL: off
-    org.hibernate.orm.jdbc.bind: trace
-    org.hibernate.type.descriptor.sql: trace
+    org.hibernate.orm.jdbc.bind: info      # 공통은 너무 시끄럽지 않게
+    org.hibernate.type.descriptor.sql: info
+    org.springframework.web: info
+    org.springframework.web.filter.CommonsRequestLoggingFilter: INFO
 
-    # Spring Web
-    org.springframework.web: trace
-    org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
-
-#file storage
 hrbank:
   storage:
     root: ./storage
 
   backup:
-    cron: "0 0 * * * *"      # 매 시 정각
-    timezone: "UTC"   # 글로벌 서비스
+    cron: "0 0 * * * *"    # 매시 정각
+    timezone: "UTC"

@@ -14,6 +14,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -83,7 +84,9 @@ public class BackupService {
     Path tempCsv = null;
     try {
       // ===== STEP.3 CSV 생성 =====
-      tempCsv = Files.createTempFile("hrbank-employees-", ".csv");
+      Path appTmp = Paths.get(System.getProperty("java.io.tmpdir"), "hrbank");
+      Files.createDirectories(appTmp);
+      tempCsv = Files.createTempFile(appTmp, "hrbank-employees-", ".csv");
       writeEmployeesCsv(tempCsv);
 
       // 파일명: employees-YYYYMMddHHmmss.csv (표시는 타임존, 저장값은 Instant)
@@ -110,7 +113,9 @@ public class BackupService {
 
       // 에러 로그 저장 (STEP.4-2)
       try {
-        Path tempLog = Files.createTempFile("hrbank-backup-error-", ".log");
+        Path appTmp = Paths.get(System.getProperty("java.io.tmpdir"), "hrbank");
+        Files.createDirectories(appTmp);
+        Path tempLog = Files.createTempFile(appTmp, "hrbank-backup-error-", ".log");
         Files.writeString(tempLog, "Backup failed: " + e.getMessage());
 
         String logName = "backup-error-" + TS.format(Instant.now()) + ".log";

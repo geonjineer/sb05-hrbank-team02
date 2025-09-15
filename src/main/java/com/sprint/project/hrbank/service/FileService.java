@@ -2,14 +2,14 @@ package com.sprint.project.hrbank.service;
 
 import com.sprint.project.hrbank.dto.file.FileResponse;
 import com.sprint.project.hrbank.entity.File;
-import com.sprint.project.hrbank.exception.FileStorageException;
+import com.sprint.project.hrbank.exception.BusinessException;
+import com.sprint.project.hrbank.exception.ErrorCode;
 import com.sprint.project.hrbank.repository.FileRepository;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
@@ -29,18 +29,16 @@ public class FileService {
   @Transactional
   public FileResponse upload(MultipartFile file) {
     if (file == null || file.isEmpty()) {
-      throw new IllegalArgumentException("업로드할 파일이 비어있습니다.");
+      throw new BusinessException(ErrorCode.FILE_EMPTY, "업로드할 파일이 비어있습니다.");
     }
 
     final String safeFileName = normalizeFileName(file.getOriginalFilename());
     final String safeContentType = normalizeContentType(file.getContentType());
     final long size = file.getSize();
 
-    // 1) 메타 저장
     File meta = new File(safeFileName, safeContentType, size);
     meta = fileRepository.save(meta);
 
-    // 2) 디스크 저장 (실패 시 메타 롤백)
     final Path root = Path.of(storageRoot);
     try {
       Files.createDirectories(root);
@@ -51,29 +49,55 @@ public class FileService {
       return new FileResponse(meta.getId(), safeFileName, safeContentType, size);
     } catch (IOException e) {
       fileRepository.deleteById(meta.getId());
-      throw new FileStorageException("디스크 저장에 실패했습니다. id: " + meta.getId(), e);
+      throw new BusinessException(ErrorCode.FILE_STORAGE_IO_ERROR,
+          "디스크 저장에 실패했습니다. id=" + meta.getId(), e);
     }
   }
 
   @Transactional(readOnly = true)
   public FileResponse getMeta(Long id) {
     File meta = fileRepository.findById(id)
-        .orElseThrow(() -> new NoSuchElementException("파일 메타 정보를 찾을 수 없습니다. id: " + id));
-    return new FileResponse(meta.getId(), meta.getFileName(), meta.getContentType(),
-        meta.getSize());
+        .orElseThrow(() -> new BusinessException(ErrorCode.FILE_META_NOT_FOUND,
+            "파일 메타 정보를 찾을 수 없습니다. id=" + id));
+    return new FileResponse(meta.getId(), meta.getFileName(), meta.getContentType(), meta.getSize());
   }
 
   @Transactional(readOnly = true)
   public FileSystemResource download(Long id) {
-    // 메타 존재 확인
     fileRepository.findById(id)
-        .orElseThrow(() -> new NoSuchElementException("파일 메타 정보를 찾을 수 없습니다. id: " + id));
+        .orElseThrow(() -> new BusinessException(ErrorCode.FILE_META_NOT_FOUND,
+            "파일 메타 정보를 찾을 수 없습니다. id=" + id));
 
     Path filePath = Path.of(storageRoot, String.valueOf(id));
     if (!Files.exists(filePath)) {
-      throw new FileStorageException("디스크에서 파일을 찾을 수 없습니다. path: " + filePath);
+      throw new BusinessException(ErrorCode.FILE_NOT_FOUND_ON_DISK,
+          "디스크에서 파일을 찾을 수 없습니다. path=" + filePath);
     }
     return new FileSystemResource(filePath);
+  }
+
+  // 서버에서 생성한 임시 파일을 파일 관리 규칙에 맞게 저장한다.
+  // 1. size 체크 -> File meta save
+  // 2. storage/{id} 위치로 이동
+  @Transactional
+  public FileResponse saveLocal(Path tempFile, String fileName, String contentType) {
+    try {
+      long size = Files.size(tempFile);
+
+      File meta = new File(fileName, contentType, size);
+      meta = fileRepository.save(meta);
+
+      Path root = Path.of(storageRoot);
+      Files.createDirectories(root);
+
+      Path dest = root.resolve(String.valueOf(meta.getId()));
+      Files.move(tempFile, dest, StandardCopyOption.REPLACE_EXISTING);
+
+      return new FileResponse(meta.getId(), fileName, contentType, size);
+    } catch (IOException e) {
+      throw new BusinessException(ErrorCode.FILE_STORAGE_IO_ERROR,
+          "로컬 파일 저장 실패: " + tempFile, e);
+    }
   }
 
   // ----- 내부 정규화 유틸 -----
@@ -101,28 +125,5 @@ public class FileService {
     }
     String t = contentType.trim().toLowerCase();
     return t.matches("^[\\w!#$&^_.+-]+/[\\w!#$&^_.+-]+$") ? t : "application/octet-stream";
-  }
-
-  // 서버에서 생성한 임시 파일을 파일 관리 규칙에 맞게 저장한다.
-  // 1. size 체크 -> File meta save
-  // 2. storage/{id} 위치로 이동
-  @Transactional
-  public FileResponse saveLocal(Path tempFile, String fileName, String contentType) {
-    try {
-      long size = Files.size(tempFile);
-
-      File meta = new File(fileName, contentType, size);
-      meta = fileRepository.save(meta);
-
-      Path root = Path.of(storageRoot);
-      Files.createDirectories(root);
-
-      Path dest = root.resolve(String.valueOf(meta.getId()));
-      Files.move(tempFile, dest, StandardCopyOption.REPLACE_EXISTING);
-
-      return new FileResponse(meta.getId(), fileName, contentType, size);
-    } catch (IOException e) {
-      throw new FileStorageException("로컬 파일 저장 실패: " + tempFile, e);
-    }
   }
 }

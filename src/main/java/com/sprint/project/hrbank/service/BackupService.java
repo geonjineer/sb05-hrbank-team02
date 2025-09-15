@@ -13,6 +13,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -70,7 +71,11 @@ public class BackupService {
 
     Path tempCsv = null;
     try {
-      tempCsv = Files.createTempFile("hrbank-employees-", ".csv");
+      // ===== STEP.3 CSV 생성 =====
+      Path appTmp = Paths.get(System.getProperty("java.io.tmpdir"), "hrbank");
+      Files.createDirectories(appTmp);
+      tempCsv = Files.createTempFile(appTmp, "hrbank-employees-", ".csv");
+
       writeEmployeesCsv(tempCsv);
 
       var ts = DateTimeFormatter.ofPattern("yyyyMMddHHmmss").withZone(zone).format(now);
@@ -86,7 +91,9 @@ public class BackupService {
       try { if (tempCsv != null) Files.deleteIfExists(tempCsv); } catch (IOException ignore) {}
 
       try {
-        Path tempLog = Files.createTempFile("hrbank-backup-error-", ".log");
+        Path appTmp = Paths.get(System.getProperty("java.io.tmpdir"), "hrbank");
+        Files.createDirectories(appTmp);
+        Path tempLog = Files.createTempFile(appTmp, "hrbank-backup-error-", ".log");
         Files.writeString(tempLog, "Backup failed: " + e.getMessage());
 
         var ts = DateTimeFormatter.ofPattern("yyyyMMddHHmmss").withZone(zone).format(Instant.now());

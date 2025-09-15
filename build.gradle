@@ -2,17 +2,74 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.5'
     id 'io.spring.dependency-management' version '1.1.7'
-    id "org.sonarqube" version "6.3.1.5724"
+    id 'org.sonarqube' version '6.3.1.5724'
+    id 'jacoco'
+}
+
+test {
+    useJUnitPlatform()                         // JUnit5라면 필수
+    systemProperty "spring.profiles.active", "test"
+    finalizedBy jacocoTestReport               // 테스트 후 리포트 자동 생성
+}
+jacoco {
+    toolVersion = "0.8.11"                     // 선택(안 써도 기본 동작)
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true                      // ✅ Sonar가 읽는 건 XML
+        html.required = true                     // 브라우저로 상세보고 보려면 유용
+    }
+    // (선택) 생성/매핑코드, Q클래스 제외 예시
+    classDirectories.setFrom(files(classDirectories.files.collect {
+        fileTree(dir: it, exclude: ["**/Q**.class", "**/*\$*Mapper*.class"])
+    }))
+}
+
+sonarqube {
+    properties {
+        property "sonar.coverage.jacoco.xmlReportPaths",
+                layout.buildDirectory.file("reports/jacoco/test/jacocoTestReport.xml").get().asFile.path
+        // (선택) 생성코드/빌드 산출물 제외
+        property "sonar.exclusions", "**/generated/**, **/Q**.java, **/build/**"
+    }
 }
 
 group = 'com.sprint.project'
 version = '0.0.1-SNAPSHOT'
 description = 'hrbank'
 
+bootJar {
+    archiveFileName = "app.jar"
+}
+
+jar {
+    enabled = false
+}
+
+def JV = JavaLanguageVersion.of(17)
+
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JV
     }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    // 어떤 플러그인이 17을 요구하더라도 21 컴파일러를 강제
+    javaCompiler = javaToolchains.compilerFor { languageVersion = JV }
+    // 만약 바이너리 타겟을 17로 유지하고 싶으면(선택)
+    // options.release = 17
+}
+
+tasks.withType(Test).configureEach {
+    // 테스트 런처도 21로
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JV }
+}
+
+tasks.withType(Javadoc).configureEach {
+    javadocTool = javaToolchains.javadocToolFor { languageVersion = JV }
 }
 
 configurations {

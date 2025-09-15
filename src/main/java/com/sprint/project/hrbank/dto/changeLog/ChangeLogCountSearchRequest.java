@@ -19,7 +19,7 @@ public record ChangeLogCountSearchRequest(
 
   public static ChangeLogCountSearchRequest of(ChangeLogCountSearchRequest r) {
     Instant toDate = defaultInstant(r.toDate(), Instant.now());
-    Instant fromDate = defaultInstant(r.fromDate(), toDate.minusSeconds(7 * 24 * 60 * 60));
+    Instant fromDate = defaultInstant(r.fromDate(), toDate.minusSeconds(7 * 24 * 60 * 60L));
 
     return new ChangeLogCountSearchRequest(fromDate, toDate);
   }

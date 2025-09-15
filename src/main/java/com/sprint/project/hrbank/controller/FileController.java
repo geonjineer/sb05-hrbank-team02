@@ -2,6 +2,8 @@ package com.sprint.project.hrbank.controller;
 
 import com.sprint.project.hrbank.dto.file.FileResponse;
 import com.sprint.project.hrbank.service.FileService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
@@ -12,27 +14,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/files")
 @RequiredArgsConstructor
+@Tag(name = "파일 관리", description = "파일 관리 API")
 public class FileController {
 
   private final FileService fileService;
 
-  // (팀내 사용) 업로드 – 외부 공개 스펙에 없으면 빼도 됨
-  @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<FileResponse> upload(@RequestPart("file") MultipartFile file) {
-    // 검증/정규화는 서비스에서 수행
-    return ResponseEntity.ok(fileService.upload(file));
-  }
-
   // 다운로드 (공개 스펙)
+  @Operation(summary = "파일 다운로드")
   @GetMapping("/{id}/download")
   public ResponseEntity<FileSystemResource> download(@PathVariable Long id) {
     FileResponse meta = fileService.getMeta(id);

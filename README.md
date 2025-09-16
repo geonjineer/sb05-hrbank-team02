@@ -29,13 +29,6 @@
 
 👉 [Swagger API 문서](http://sprint-project-1196140422.ap-northeast-2.elb.amazonaws.com/sb/hrbank/api/swagger-ui/index.html)
 
----
-
-네, 제공해주신 API 명세의 엔드포인트와 스키마를 명확하게 정리해 드리겠습니다.
-
----
-
-네, 알겠습니다. 처음에 올려주신 순서 그대로 API 명세를 다시 정리해 드리겠습니다.
 
 ---
 

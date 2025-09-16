@@ -215,40 +215,51 @@
 ## 📂 프로젝트 구조 (Project Structure)
 
 ```
-
 sb05-hrbank-team02
-┣ .gradle
-┣ .idea
-┣ build.gradle
-┣ gradlew
-┣ gradlew\.bat
-┣ settings.gradle
-┣ src
-┃ ┣ main
-┃ ┃ ┣ java
-┃ ┃ ┃ ┗ com
-┃ ┃ ┃   ┗ sprint
-┃ ┃ ┃     ┗ project
-┃ ┃ ┃       ┗ hrbank
-┃ ┃ ┃         ┣ HrbankApplication.java
-┃ ┃ ┃         ┣ controller
-┃ ┃ ┃         ┣ dto
-┃ ┃ ┃         ┣ entity
-┃ ┃ ┃         ┣ exception
-┃ ┃ ┃         ┣ repository
-┃ ┃ ┃         ┗ service
-┃ ┃ ┣ resources
-┃ ┃ ┃ ┣ application.yml
-┃ ┃ ┃ ┣ static
-┃ ┃ ┃ ┗ templates
-┃ ┣ test
-┃ ┃ ┗ java
-┃ ┃   ┗ com
-┃ ┃     ┗ sprint
-┃ ┃       ┗ project
-┃ ┃         ┗ hrbank
-┃ ┃           ┗ HrbankApplicationTests.java
-
+├── .git/
+├── .github/
+├── gradle/
+├── build.gradle
+├── gradle.properties
+├── gradlew
+├── gradlew.bat
+├── settings.gradle
+└── src
+    ├── main
+    │   ├── java
+    │   │   └── com/sprint/project/hrbank
+    │   │       ├── HrbankApplication.java
+    │   │       ├── configuration/
+    │   │       ├── controller/
+    │   │       ├── converter/
+    │   │       ├── dto/
+    │   │       ├── entity/
+    │   │       ├── exception/
+    │   │       ├── functionalInterface/
+    │   │       ├── mapper/
+    │   │       ├── normalizer/
+    │   │       ├── repository/
+    │   │       ├── scheduler/
+    │   │       ├── service/
+    │   │       └── validation/
+    │   └── resources
+    │       ├── HR Bank.sql
+    │       ├── application.yml
+    │       ├── application-prod.yml
+    │       ├── application-test.yml
+    │       ├── data.sql
+    │       ├── messages.properties
+    │       └── static
+    │           └── assets
+    │               └── images/
+    └── test
+        └── java/com/sprint/project/hrbank
+            ├── ClientIpResolverTest.java
+            ├── CursorCodecTest.java
+            ├── CursorPageAssemblerTest.java
+            ├── EmployeeCreateRequestValidationTest.java
+            ├── HrbankApplicationTests.java
+            └── SearchRequestNormalizerTest.java
 ```
 
 ---
